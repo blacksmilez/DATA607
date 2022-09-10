@@ -11,8 +11,8 @@
         "release_date": "2022-06-11",
         "title": "Dragon Ball Super: Super Hero",
         "video": false
-    },
-        {
+     },
+     {
         "adult": false,
         "backdrop_path": "/ugS5FVfCI3RV0ZwZtBV3HAV75OX.jpg",
         "id": 610150,
@@ -24,8 +24,8 @@
         "release_date": "2022-06-11",
         "title": "Dragon Ball Super: Super Hero",
         "video": false
-    },
-    {
+     },
+     {
         "adult": false,
         "backdrop_path": "/hYZ4a0JvPETdfgJJ9ZzyFufq8KQ.jpg",
         "id": 629176,
@@ -37,8 +37,8 @@
         "release_date": "2022-08-25",
         "title": "Samaritan",
         "video": false
-    },
-    {
+     },
+     {
         "adult": false,
         "backdrop_path": "/jsoz1HlxczSuTx0mDl2h0lxy36l.jpg",
         "id": 616037,
@@ -50,5 +50,5 @@
         "release_date": "2022-07-06",
         "title": "Thor: Love and Thunder",
         "video": false
-    }
+     }
 ]
