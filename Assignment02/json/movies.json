@@ -4,51 +4,12 @@
         "backdrop_path": "/ugS5FVfCI3RV0ZwZtBV3HAV75OX.jpg",
         "id": 610150,
         "original_language": "ja",
-        "original_title": "",
+        "original_title": "Dragon Ball Superhero",
         "overview": "The Red Ribbon Army, an evil organization that was once destroyed by Goku in the past, has been reformed by a group of people who have created new and mightier Androids, Gamma 1 and Gamma 2, and seek vengeance against Goku and his family.",
         "popularity": 8753.85,
         "poster_path": "/rugyJdeoJm7cSJL1q4jBpTNbxyU.jpg",
         "release_date": "2022-06-11",
         "title": "Dragon Ball Super: Super Hero",
         "video": false
-     },
-     {
-        "adult": false,
-        "backdrop_path": "/ugS5FVfCI3RV0ZwZtBV3HAV75OX.jpg",
-        "id": 610150,
-        "original_language": "ja",
-        "original_title": "ドラゴンボール超 スーパーヒーロー",
-        "overview": "The Red Ribbon Army, an evil organization that was once destroyed by Goku in the past, has been reformed by a group of people who have created new and mightier Androids, Gamma 1 and Gamma 2, and seek vengeance against Goku and his family.",
-        "popularity": 8753.85,
-        "poster_path": "/rugyJdeoJm7cSJL1q4jBpTNbxyU.jpg",
-        "release_date": "2022-06-11",
-        "title": "Dragon Ball Super: Super Hero",
-        "video": false
-     },
-     {
-        "adult": false,
-        "backdrop_path": "/hYZ4a0JvPETdfgJJ9ZzyFufq8KQ.jpg",
-        "id": 629176,
-        "original_language": "en",
-        "original_title": "Samaritan",
-        "overview": "Thirteen year old Sam Cleary  suspects that his mysteriously reclusive neighbor Mr. Smith is actually the legendary vigilante Samaritan, who was reported dead 20 years ago. With crime on the rise and the city on the brink of chaos, Sam makes it his mission to coax his neighbor out of hiding to save the city from ruin.",
-        "popularity": 5115.365,
-        "poster_path": "/vwq5iboxYoaSpOmEQrhq9tHicq7.jpg",
-        "release_date": "2022-08-25",
-        "title": "Samaritan",
-        "video": false
-     },
-     {
-        "adult": false,
-        "backdrop_path": "/jsoz1HlxczSuTx0mDl2h0lxy36l.jpg",
-        "id": 616037,
-        "original_language": "en",
-        "original_title": "Thor: Love and Thunder",
-        "overview": "After his retirement is interrupted by Gorr the God Butcher, a galactic killer who seeks the extinction of the gods, Thor Odinson enlists the help of King Valkyrie, Korg, and ex-girlfriend Jane Foster, who now wields Mjolnir as the Mighty Thor. Together they embark upon a harrowing cosmic adventure to uncover the mystery of the God Butcher’s vengeance and stop him before it’s too late.",
-        "popularity": 4237.659,
-        "poster_path": "/pIkRyD18kl4FhoCNQuWxWu5cBLM.jpg",
-        "release_date": "2022-07-06",
-        "title": "Thor: Love and Thunder",
-        "video": false
-     }
+    }
 ]
