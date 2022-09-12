@@ -1,0 +1,401 @@
+---
+title: "Assignment02"
+author: "Ted Kim"
+date: "2022-09-09"
+mainfont: Helvetica
+output: 
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(eval=TRUE, message=FALSE, echo=FALSE, warning=FALSE)
+```
+
+```{r install-packages, echo=FALSE}
+
+arrPackages <- c('RMySQL', 'jsonlite', 'DBI', 'dplyr', 'tidyverse', 'googlesheets4', 'ggplot2')
+
+installed_packages <- arrPackages %in% rownames(installed.packages())
+
+if (any(installed_packages == FALSE)) {
+  install.packages(arrPackages[!installed_packages], 
+                   repos = "http://cran.us.r-project.org")
+}
+
+invisible(lapply(arrPackages, library, character.only = TRUE))
+
+```
+## OVERVIEW
+Choose six recent popular movies and ask at least five friends and family members who know to rate each movie they have seen from 1 to 5. Get the results, save them to the My SQL database, and load the information in the SQL database into the R data frame. Assuming that there is no existing database, I created a database and a table. The query generating the database and table was inserted as hardcoding in the markdown. The movie-related data was downloaded from [themoviedb.org](www.themoviedb.org) as a json file via api. Json files are registered on [GitHub](https://github.com/blacksmilez/DATA607/tree/main/Assignment02/json). It can be implemented simply by using the overwrite property of the dbWriteTable() function, but since it is not possible to create a relationship between tables, the append property will be used. Therefore, before each table is stored, duplicate data is discarded by comparing it with the existing table and json/Google sheet.
+
+
+### CONNECT MySQL
+Create a connection object to MySQL database.
+```{r connect-mysql, echo=TRUE}
+con = dbConnect(RMySQL::MySQL(),
+                user='root',
+                password='',
+                host='localhost')
+```
+
+
+### CREATE DATABASE
+In general, databases and tables are often already created. However, if a table is not created, we must create a table and put data in it when the program runs. 
+Create database *movies* if not exists, and use database *movies*
+```{r create-database, echo=TRUE}
+res <- dbSendQuery(con, 'create database if not exists movies;')
+
+res <- dbSendQuery(con, 'use movies;')
+
+```
+
+
+### CREATE TABLES
+Create tables *genres, movies, movies_genres*  if not exists
+```{r create-tables, echo=TRUE}
+res <- dbSendQuery(con, 'create table if not exists genres (
+                        	id int primary key,
+                        	description varchar(40)
+                        ) engine=innodb;')
+
+res <- dbSendQuery(con, 'create table if not exists movies (
+                        	id int auto_increment primary key,
+                        	adult bool,
+                        	backdrop_path varchar(255),
+                        	original_language varchar(10),
+                        	original_title varchar(255),
+                        	overview varchar(1000),
+                        	popularity double(8,3),
+                        	poster_path varchar(255),
+                        	release_date date,
+                        	title varchar(255),
+                        	video bool,
+                        	vote_average double(8,3),
+                        	vote_count int  
+                        ) engine=innodb;')
+
+res <- dbSendQuery(con, 'create table if not exists movies_genres (
+                        	id int auto_increment primary key,
+                        	movie_id int,
+                        	genre_id int,
+                        	foreign key (movie_id) references movies (id),
+                        	foreign key (genre_id) references genres (id)
+                        ) engine=innodb;')
+
+res <- dbSendQuery(con, 'create table if not exists survey_result (
+                        	id int auto_increment primary key,
+                            survey_id int,
+                            movie_id int,
+                            email_address varchar(255),
+                            rate int,
+                            registered datetime,
+                            foreign key (movie_id) references movies (id)
+                        ) engine=innodb;')
+
+```
+
+Displays the tables available in the database
+```{r}
+dbListTables(con)
+```
+
+
+
+
+## LOAD GENRES DATA
+Stores genre data imported from TMDB into the table on SQL Server. Since the same data may exist in the table on SQL Server, only subsets of the two data that do not exist in the table on SQL Server are appended.\
+**Get genres data from SQL server**
+```{r get-genres-data-from-sql, results='asis', echo=TRUE}
+dfGenres <- fetch(dbSendQuery(con, 'select * from genres'), )
+dbClearResult(dbListResults(con)[[1]])
+```
+
+**Get genres.json from github to load**
+```{r get-genres-data-from-json, results='asis', echo=TRUE}
+file <- 'https://raw.githubusercontent.com/blacksmilez/DATA607/main/Assignment02/json/genres.json'
+jsonGenres <- fromJSON(file)  
+```
+
+**Retrieve all rows on data frame *dfGenres, jsonGenres* to verify**
+```{r retrieve-all-result, echo=TRUE}
+print(dfGenres[order(dfGenres$id),], row.names = FALSE, right = FALSE)
+print(jsonGenres[order(jsonGenres$id),], row.names = FALSE, right = FALSE)
+```
+
+**Get Subsets of the two data that do not exist in the table on SQL Server**
+```{r subset}
+dfSubsets <- subset(jsonGenres, !(id %in% dfGenres$id))
+print(dfSubsets[order(dfSubsets$id),], row.names = FALSE, right = FALSE)
+```
+
+**Append subsets into the table on SQL Server**
+```{r append-subsets-genres, echo=TRUE}
+dbWriteTable(con, 'genres', dfSubsets[, c('id', 'description')], row.names=FALSE, append=TRUE)
+```
+
+
+
+
+## LOAD MOVIES DATA
+Stores movies data imported from TMDB into the table on SQL Server. Since the same data may exist in the table on SQL Server, only subsets of the two data that do not exist in the table on SQL Server are appended.
+
+**Get movies data from SQL server**
+```{r get-movies-data-from-sql, results='asis', echo=TRUE}
+dfMovies <- fetch(dbSendQuery(con, 'select * from movies'), )
+dbClearResult(dbListResults(con)[[1]])
+```
+
+**Get movies.json from github to load**
+```{r get-movies-data-from-json, results='asis', echo=TRUE}
+file <- 'https://raw.githubusercontent.com/blacksmilez/DATA607/main/Assignment02/json/movies.json'
+jsonMovies <- fromJSON(file)  
+```
+
+**Retrieve all rows on data frame *dfMovies, jsonMovies* to verify**
+```{r retrieve-all-movies-result, echo=TRUE}
+print(dfMovies[order(dfMovies$id), c('id', 'title', 'release_date')], 
+      row.names = FALSE, right = FALSE)
+
+print(jsonMovies[order(jsonMovies$id), c('id', 'title', 'release_date')], 
+      row.names = FALSE, right = FALSE)
+```
+
+**Get Subsets of the two data that do not exist in the table on SQL Server**
+```{r subset-two-movies-dataframe}
+dfSubsets <- subset(jsonMovies, !(id %in% dfMovies$id))
+print(dfSubsets[order(dfSubsets$id), c('id', 'title', 'release_date')], 
+      row.names = FALSE, right = FALSE)
+```
+
+**Append subsets into the table on SQL Server**
+```{r append-subsets-movies, echo=TRUE}
+dbWriteTable(con, 'movies', 
+             dfSubsets[, c('id', 'adult', 'backdrop_path', 'original_language', 
+                          'original_title', 'overview', 'popularity', 'title',
+                          'poster_path', 'release_date', 'video')], 
+             row.names=FALSE, append=TRUE)
+```
+
+
+
+
+## LOAD MOVIES-GENRES DATA
+Stores movies_genres data imported from TMDB into the table on SQL Server. Since the same data may exist in the table on SQL Server, only subsets of the two data that do not exist in the table on SQL Server are appended.
+
+**Get movies_genres data from SQL server**
+```{r get-movies_genres-data-from-sql, results='asis', echo=TRUE}
+dfMoviesGenres <- fetch(dbSendQuery(con, 'select * from movies_genres'), )
+dbClearResult(dbListResults(con)[[1]])
+```
+
+**Get movies_genres.json from github to load**
+```{r get-movies_genres-data-from-json, results='asis', echo=TRUE}
+file <- 'https://raw.githubusercontent.com/blacksmilez/DATA607/main/Assignment02/json/movies_genres.json'
+jsonMoviesGenres <- fromJSON(file)  
+```
+
+**Retrieve all rows on data frame *dfMoviesGenres, jsonMoviesGenres* to verify**
+```{r retrieve-all-movies_genres-result, echo=TRUE}
+print(dfMoviesGenres[order(dfMoviesGenres$movie_id, dfMoviesGenres$genre_id),], 
+      row.names = FALSE, right = FALSE)
+
+print(jsonMoviesGenres[order(jsonMoviesGenres$movie_id, jsonMoviesGenres$genre_id),], 
+      row.names = FALSE, right = FALSE)
+```
+
+**Get Subsets of the two data that do not exist in the table on SQL Server**
+```{r subset-two-movies_genres-dataframe}
+dfSubsets <- subset(jsonMoviesGenres, !(movie_id %in% dfMoviesGenres$movie_id&&genre_id %in% dfMoviesGenres$genre_id))
+print(dfSubsets[order(dfSubsets$movie_id),], row.names = FALSE, right = FALSE)
+```
+
+**Append subsets into the table on SQL Server**
+```{r append-subsets-movies_genres, echo=TRUE}
+dbWriteTable(con, 'movies_genres', 
+             dfSubsets[, c('movie_id', 'genre_id')], 
+             row.names=FALSE, append=TRUE)
+```
+
+※ The following error occured when running "dbWriteTable()" for the first time:\
+*"ERROR: Loading local data is disabled - this must be enabled on both the client and server sides"*\
+error occurs while copying data frames to database tables using dbWriteTable(), it is handled as follows:
+```{r, echo=TRUE}
+# 1. open mysql terminal
+# 2. check the local_infile
+#    mysql> show global variables like 'local_infile'
+#    +---------------+-------+
+#    | Variable_name | Value |
+#    +---------------+-------+
+#    | local_infile  |  OFF  |
+#    +---------------+-------+
+#    (this means local_infile is disable)
+# 3. put set command
+#    mysql> set global local_infile=true;
+#    mysql> exit
+```
+
+
+
+
+## LOAD SURVEY DATA
+Stores survey data imported from Google Sheet into the table on SQL Server. Since the same data may exist in the table on SQL Server, only subsets of the two data that do not exist in the table on SQL Server are appended.\
+
+**Get survey result data from SQL server**\
+Obtain survey data from SQL Server. There is no record set returned because there is no data at the time of initial execution.
+```{r get-survey-result-from-sql, results='asis', echo=TRUE}
+dfSurveyResults <- fetch(
+                    dbSendQuery(con, 'select * from survey_result where survey_id = 1'),)
+dbClearResult(dbListResults(con)[[1]])
+
+print(dfSurveyResults[order(dfSurveyResults$movie_id),], row.names = FALSE, right = FALSE) 
+```
+
+**Get survey result from google sheet to load**\
+The survey was conducted with Google Forms that can be easily used.\ \
+[hyperlink: https://docs.google.com/forms/d/e/1FAIpQLSeL4Ymj956wxJ9rMH-ie-XHgmg6P-d25iHjvxAyNmKc7QIvIg/viewform?vc=0&c=0&w=1&flr=0](https://docs.google.com/forms/d/e/1FAIpQLSeL4Ymj956wxJ9rMH-ie-XHgmg6P-d25iHjvxAyNmKc7QIvIg/viewform?vc=0&c=0&w=1&flr=0) \ \
+It brings up the Google sheet where the data input through Google Form is stored.
+```{r get-survey-result-gssheet, results='asis', echo=TRUE}
+gs4_deauth()
+file <- 'https://docs.google.com/spreadsheets/d/1n8U9AbOSKMI871oHoycPK-WXcKkC3_VmfdSx742hbTo/edit?usp=sharing'
+df <- as.data.frame(read_sheet(file))
+```
+
+**Get survey result from google sheet to load**\
+The ID of the movie used for the survey is included in the array. A separate metric table should be created, but this time it will be omitted.
+```{r movies_id, results='asis', echo=TRUE}
+movies_id <- c(361743, 507086, 634649, 539681, 629176, 755566)
+```
+
+Creates an empty data frame for storing subsets.
+```{r create-subset, results='asis', echo=TRUE}
+dfSurveySubsets <- data.frame(matrix(ncol=5, nrow=0))
+colnames(dfSurveySubsets) <- c('survey_id', 'movie_id', 'email_address', 'rate', 'registered')
+```
+
+Only new survey data that does not exist in the existing survey table is selected from the Google sheet.
+```{r trim-dataframe, results='asis', echo=TRUE}
+count <- 1
+for(id in movies_id) {
+  dftmp <- df[, c('survey_id', paste0('movie', count), 'email_address', 'registered')]
+  names(dftmp)[names(dftmp) == paste0('movie', count)] <- 'rate'
+  dftmp['movie_id'] <- id
+  dfSubsets <- subset(dftmp, !(movie_id %in% dfSurveyResults$movie_id
+                               &&email_address %in% dfSurveyResults$email_address))
+  dfSurveySubsets <- rbind(dfSurveySubsets, dfSubsets)
+  count = count + 1
+}
+print(dfSurveySubsets)
+
+```
+
+**Append subsets into the table on SQL Server**\
+Only non-duplicated data is stored in the SQL Server table.
+```{r append-subsets-survey, echo=TRUE}
+dbWriteTable(con, 'survey_result', 
+             dfSurveySubsets, 
+             row.names=FALSE, append=TRUE)
+```
+
+**Re-Get survey result data from SQL server**\
+The survey data is retrieved from the SQL server again.
+```{r re-get-survey-result-from-sql, results='asis', echo=TRUE}
+dfSurveyResults <- fetch(dbSendQuery(con, 'select * from survey_result where survey_id = 1'),)
+dbClearResult(dbListResults(con)[[1]])
+```
+
+Make the column names the same for join between two data frames.
+```{r rename-id-to-movie-id, results='asis', echo=TRUE}
+names(jsonMovies)[names(jsonMovies) == 'id'] <- 'movie_id'
+```
+
+
+Merge the two data tables and remove unnecessary columns.
+```{r merge-remove-columns, results='asis', echo=TRUE}
+dfResults <- merge(dfSurveyResults, jsonMovies, by = 'movie_id')
+dftmp <- subset(dfResults, select = -c(registered, adult, backdrop_path, original_language, 
+                                   overview, original_title, poster_path, release_date,
+                                   video, id, survey_id))
+```
+
+
+**Graphs drawn without calibration of missing data**\
+If the graph is drawn without calibration of missing data as follows.\
+```{r}
+ggplot(dftmp, aes(x=title, y=rate)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
+  labs(x='Movie Title', y='Rate')
+
+```
+
+## Missing Data (1)
+**For calibration, the missing values can be filled with *mean* values.**\
+```{r missing-data-mean, echo=TRUE}
+colnames(dftmp)
+dfmean <- dftmp %>%
+        group_by(movie_id) %>%
+        mutate(mean = mean(rate))
+
+dfmean$rate <- ifelse(dfmean$rate == 0, dfmean$mean, dfmean$rate)
+
+print(dfmean, n=100)
+
+```
+
+**Graph of missing values filled with *mean* values**\
+```{r, missing-data-graph-mean, echo=TRUE}
+ggplot(dfmean, aes(x=title, y=rate)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
+  labs(x='Movie Title', y='Rate')
+
+```
+
+## Missing Data (2)
+**For calibration, the missing values can be filled with *median* values.**\
+```{r missing-data-median, echo=TRUE}
+dfmedian <- dftmp %>%
+        group_by(movie_id) %>%
+        mutate(median = median(rate))
+
+dfmedian$rate <- ifelse(dfmedian$rate == 0, dfmedian$median, dfmedian$rate)
+
+print(dfmedian, n=100)
+
+```
+
+**Graph of missing values filled with *median* values**\
+```{r, missing-data-graph-median, echo=TRUE}
+ggplot(dfmedian, aes(x=title, y=rate)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
+  labs(x='Movie Title', y='Rate')
+
+```
+
+## Missing Data (3)
+**For calibration, the missing values can be filled with *max* values.**\
+```{r missing-data-max, echo=TRUE}
+dfmax <- dftmp %>%
+        group_by(movie_id) %>%
+        mutate(max = max(rate))
+
+dfmax$rate <- ifelse(dfmax$rate == 0, dfmax$max, dfmax$rate)
+
+print(dfmax, n=100)
+
+```
+
+**Graph of missing values filled with *max* values**\
+```{r, missing-data-graph-max, echo=TRUE}
+ggplot(dfmax, aes(x=title, y=rate)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
+  labs(x='Movie Title', y='Rate')
+
+```
+
+## Closure
+The advantage of normalization is that it does not have unnecessary redundant data. It is possible to maintain the integrity of the data by removing the duplicate data. This is a big advantage of relational databases, but in other words, it can also be a big disadvantage. This is because emphasizing excessive normalization causes problems in system performance. Data standardization increases mutual communication by further specifying data. There are various ways to process missing data, but I checked by filling it with mean, median, and max values. Each has a slight difference, so I think we should choose and use it as needed.
+
+[Github: https://github.com/blacksmilez/DATA607/tree/main/Assignment02](https://github.com/blacksmilez/DATA607/tree/main/Assignment02)
