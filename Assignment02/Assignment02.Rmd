@@ -2,9 +2,13 @@
 title: "Assignment02"
 author: "Ted Kim"
 date: "2022-09-09"
-mainfont: Helvetica
-output: 
-  pdf_document: default
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+fontsize: 10pt
+linestretch: 1.5
 ---
 
 ```{r setup, include=FALSE}
@@ -25,6 +29,10 @@ if (any(installed_packages == FALSE)) {
 invisible(lapply(arrPackages, library, character.only = TRUE))
 
 ```
+
+## Team Member
+Seung Min Song
+
 ## OVERVIEW
 Choose six recent popular movies and ask at least five friends and family members who know to rate each movie they have seen from 1 to 5. Get the results, save them to the My SQL database, and load the information in the SQL database into the R data frame. Assuming that there is no existing database, I created a database and a table. The query generating the database and table was inserted as hardcoding in the markdown. The movie-related data was downloaded from [themoviedb.org](www.themoviedb.org) as a json file via api. Json files are registered on [GitHub](https://github.com/blacksmilez/DATA607/tree/main/Assignment02/json). It can be implemented simply by using the overwrite property of the dbWriteTable() function, but since it is not possible to create a relationship between tables, the append property will be used. Therefore, before each table is stored, duplicate data is discarded by comparing it with the existing table and json/Google sheet.
 
@@ -59,7 +67,7 @@ res <- dbSendQuery(con, 'create table if not exists genres (
                         ) engine=innodb;')
 
 res <- dbSendQuery(con, 'create table if not exists movies (
-                        	id int auto_increment primary key,
+                        	movie_id int auto_increment primary key,
                         	adult bool,
                         	backdrop_path varchar(255),
                         	original_language varchar(10),
@@ -78,7 +86,7 @@ res <- dbSendQuery(con, 'create table if not exists movies_genres (
                         	id int auto_increment primary key,
                         	movie_id int,
                         	genre_id int,
-                        	foreign key (movie_id) references movies (id),
+                        	foreign key (movie_id) references movies (movie_id),
                         	foreign key (genre_id) references genres (id)
                         ) engine=innodb;')
 
@@ -89,7 +97,7 @@ res <- dbSendQuery(con, 'create table if not exists survey_result (
                             email_address varchar(255),
                             rate int,
                             registered datetime,
-                            foreign key (movie_id) references movies (id)
+                            foreign key (movie_id) references movies (movie_id)
                         ) engine=innodb;')
 
 ```
@@ -153,24 +161,24 @@ jsonMovies <- fromJSON(file)
 
 **Retrieve all rows on data frame *dfMovies, jsonMovies* to verify**
 ```{r retrieve-all-movies-result, echo=TRUE}
-print(dfMovies[order(dfMovies$id), c('id', 'title', 'release_date')], 
+print(dfMovies[order(dfMovies$movie_id), c('movie_id', 'title', 'release_date')], 
       row.names = FALSE, right = FALSE)
 
-print(jsonMovies[order(jsonMovies$id), c('id', 'title', 'release_date')], 
+print(jsonMovies[order(jsonMovies$movie_id), c('movie_id', 'title', 'release_date')], 
       row.names = FALSE, right = FALSE)
 ```
 
 **Get Subsets of the two data that do not exist in the table on SQL Server**
 ```{r subset-two-movies-dataframe}
-dfSubsets <- subset(jsonMovies, !(id %in% dfMovies$id))
-print(dfSubsets[order(dfSubsets$id), c('id', 'title', 'release_date')], 
+dfSubsets <- subset(jsonMovies, !(movie_id %in% dfMovies$movie_id))
+print(dfSubsets[order(dfSubsets$movie_id), c('movie_id', 'title', 'release_date')], 
       row.names = FALSE, right = FALSE)
 ```
 
 **Append subsets into the table on SQL Server**
 ```{r append-subsets-movies, echo=TRUE}
 dbWriteTable(con, 'movies', 
-             dfSubsets[, c('id', 'adult', 'backdrop_path', 'original_language', 
+             dfSubsets[, c('movie_id', 'adult', 'backdrop_path', 'original_language', 
                           'original_title', 'overview', 'popularity', 'title',
                           'poster_path', 'release_date', 'video')], 
              row.names=FALSE, append=TRUE)
@@ -292,7 +300,7 @@ print(dfSurveySubsets)
 Only non-duplicated data is stored in the SQL Server table.
 ```{r append-subsets-survey, echo=TRUE}
 dbWriteTable(con, 'survey_result', 
-             dfSurveySubsets, 
+             dfSurveySubsets[dfSurveySubsets$rate > 0,], 
              row.names=FALSE, append=TRUE)
 ```
 
@@ -393,6 +401,127 @@ ggplot(dfmax, aes(x=title, y=rate)) +
   theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
   labs(x='Movie Title', y='Rate')
 
+```
+
+## Global Baseline Estimate
+```{r echo=TRUE}
+df <- fetch(dbSendQuery(con, 'select movie_id, email_address, rate from survey_result where survey_id = 1'),)
+dbClearResult(dbListResults(con)[[1]])
+```
+There is no record for the review with no rating in the table because Null values are not stored in the data for data integrity. Therefore, use pivot_wider() and pivot_longer() function to create missing record. \
+### Step 1. Use the pivot_wider() function to create a data frame identical to Excel format. Missing record will display as a  'NA'.
+```{r step-1, echo=TRUE}
+pv_wider <- df %>%
+              pivot_wider(
+                names_from = movie_id,
+                values_from = rate
+              )
+
+print(pv_wider)
+```
+
+### Step 2. If change the data frame created in step 1 to its original form using the pivot_longer() function, a data frame including the missing record is created.
+```{r step-2, echo=TRUE}
+pv_longer <- pv_wider %>%
+              pivot_longer(
+                cols = colnames(pv_wider)[2:7],
+                names_to = 'movie_id',
+                values_to = 'rate'
+              )
+
+print(pv_longer)
+```
+
+### Step 3. use is.na() function to exclude NA value. After that calculate movie_avg for each movie. (identical to Excel A18:G18)
+```{r step-3, echo=TRUE}
+movie_avg <- pv_longer %>%
+                filter(!is.na(rate)) %>%
+                group_by(movie_id) %>%
+                summarise(movie_avg = mean(rate))
+print(movie_avg)
+```
+
+### Step 4. use is.na() function to exclude NA value. After that calculate movie_mean. (identical to Excel H18)
+```{r step-4, echo=TRUE}
+movie_mean <- mean(pv_longer[!is.na(pv_longer$rate), ]$rate)
+
+print(movie_mean)
+```
+
+### Step 5. Using mutate, add column named sub_avg_mean in the movie_avg created in step 3 and insert movie_mean subtacted from movie_avg. (identical to Excel B19:G19)
+```{r step-5, echo=TRUE}
+movie_compute <- movie_avg %>%
+                    mutate(subs_avg_mean = movie_avg - movie_mean)
+
+print(movie_compute)
+```
+
+### Step 6. use is.na() function to exclude NA value. After that calculate each person's user_avg and user_avg_mean_movie (identical to Excel H2:17, I2:17)
+```{r step-6, echo=TRUE}
+user_compute <- pv_longer %>%
+                  filter(!is.na(rate)) %>%
+                  group_by(email_address) %>%
+                  mutate(
+                    user_avg = mean(rate),
+                    sub_user_avg_mean_movie = mean(rate) - movie_mean
+                  )
+
+print(user_compute)
+```
+
+### Step 7. use is.na()function to bring record with NA value and merge(m1) with the movie_compute crated in step 5 (same as Join in SQL). Then, select 'email_address', 'user_avg', 'sub_user_avg_mean_movie' from user_compute in step 6 to distinct using unique() function for merge with m1. Calculate rate to insert. 
+```{r step-7, echo=TRUE}
+m1 <- merge(pv_longer[is.na(pv_longer$rate),], movie_compute)
+print(m1)
+
+m2 <- merge(m1,
+            unique(user_compute[,c('email_address', 'user_avg', 'sub_user_avg_mean_movie')]),
+            by.x=c('email_address'),
+            by.y=c('email_address')) %>%
+      mutate(rate = round(movie_mean + subs_avg_mean + sub_user_avg_mean_movie, 0)) %>%
+      select('email_address', 'movie_id', 'rate', 'user_avg', 'sub_user_avg_mean_movie')
+print(m2)
+```
+
+### Step 8. Combine m2 created in step 7 and user_compute with no NA record using the union() function. Then merges with dfMovies so that the title can be displayed instead of the movie_id.
+```{r step-8, echo=TRUE}
+final <- merge(union(user_compute, m2),
+               dfMovies) %>%
+          select('email_address', 'title', 'rate', 'user_avg',  'sub_user_avg_mean_movie')
+print(final)
+```
+
+### step 9: use pivot_wider() function to make the data frame created in step 8 identical to Excel format and display on the screen. Use the Excel formula to review the value. 
+```{r step-9, echo=TRUE}
+final %>%
+  pivot_wider(
+    names_from = title,
+    values_from = rate
+  ) %>%
+  select(1, 4:9, 2, 3)
+
+# mean_movie
+movie_mean
+
+# movie_avg
+merge(movie_compute, dfMovies) %>%
+  select('title', 'movie_avg') %>%
+  pivot_wider(
+    names_from = title,
+    values_from = movie_avg
+  )
+# avg-mean
+merge(movie_compute, dfMovies) %>%
+  select('title', 'subs_avg_mean') %>%
+  pivot_wider(
+    names_from = title,
+    values_from = subs_avg_mean
+  )
+
+ggplot(final, aes(x=title, y=rate)) + 
+  geom_boxplot() + 
+  theme(axis.text.x = element_text(angle = 60, hjust = 1, vjust = 1.0 )) +
+  labs(x='Movie Title', y='Rate')
 ```
 
 ## Closure
