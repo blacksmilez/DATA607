@@ -1,0 +1,112 @@
+---
+title: "Project 1"
+author: "Ted Kim"
+date: "2022-09-21"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+fontsize: 10pt
+linestretch: 1.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(openintro)
+library(stringr)
+library(dplyr)
+```
+
+#### Team Member: Seung Min Song\
+\
+Read the text file by line using the readlines( ) function.
+```{r readtxtfile-data, echo=TRUE, warning=FALSE}
+file <- 'https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project1/tournamentinfo.txt'
+#file <- './7645617.txt'
+res <- readLines(file, warn=FALSE)
+res[1:10]
+```
+\
+Use the setdiff( ) function to exclude all border lines from the array. When the borderline is directly entered in the setdiff( ) function, the first borderline is not excluded for unknown reasons. Therefore, after clearing all the border lines using the str_replace_all( ) function, an object with a value of empty is removed.
+```{r stringreplaceall-data, echo=TRUE, warning=FALSE}
+res <- res %>%
+        str_remove('\\-{2,}') %>%
+        setdiff('')
+head(res)
+```
+\
+Remove strings except for the player's state and the pre-score from the lower row. Remove all of the first lower row, which is part of the header because it creates unnecessary columns when converted to data frames.
+```{r}
+res <- res %>%
+        str_replace_all('^\\sN.*|[0-9]{8}.*R\\:|(?<=\\d{3})(?:P|\\s).*', '')
+head(res)
+```
+\
+In the upper row, replace character (B, H, U, X, L, W, D), which have no value between the letter ‘|’ and the letter ‘|’, with NA. It then removes only the characters (B, H, U, X, L, W, D) that are with the values under the same conditions.
+```{r}
+res[33]
+res <- res %>%
+        str_replace_all('(?<=\\|)(B|H|U|X|L|W|D)\\s+(?=\\|)', 'NA') %>%
+        str_remove_all('(?<=\\|)(B|H|U|X|L|W|D)\\s+')
+res[31:36]
+```
+\
+Use the seq_len( ) function to divide the upper and lower rows into two arrays, then separate values between “|” and “|” by columns. Since the upper row has an odd number as a sequence, such as 1, 3, and 5, its remainder is 1 when divided by 2. Conversely, the lower row remainder is 0.
+```{r}
+seq <- seq_len(length(res)) %% 2
+
+upper <- res[seq == 1] %>%
+          str_extract_all('\\d+(?:\\.\\d{1})?|[a-zA-Z-]+(?:\\s[a-zA-Z-]+)*', simplify = TRUE)
+head(upper)
+
+lower = res[seq == 0] %>%
+          str_extract_all('\\d+|[A-Z]{2}', simplify = TRUE)
+head(lower)
+```
+\
+The upper and lower rows are combined using the cbind( ) function. And use the slice( ) function to remove the header part that is not removed for the operation. Then, define the name of the columns.
+```{r}
+df <- as.data.frame(cbind(upper, lower)) %>%
+       slice(2:n())
+colnames(df) <- c('Pair_Num', 'Player_Name', 'Total_Number_of_Point',
+                 'R_1', 'R_2', 'R_3', 'R_4', 'R_5', 'R_6', 'R_7',
+                 'Player_State', 'Player_Pre')
+head(df)
+```
+\
+Use the left_join( ) function to get the opponent’s pre-score for each round, For calculation, the opponent’s pre-score data type is converted into a numerical type.
+```{r leftjoin-data, echo=TRUE}
+for(i in 1:7) {
+  df1 <- df %>%
+         select(Pair_Num, Player_Pre)
+  df1$Player_Pre <- as.numeric(df1$Player_Pre)
+  colnames(df1) = c(paste0('R_', i), paste0('Player_Pre_', i))
+  print(head(df1))
+  df <- df %>%
+          left_join(df1)
+}
+head(df)
+```
+\
+Calculate column Player_Pre_1 to Player_Per_7(indexed 13 to 19) average and append the value to a newly created column named 'Avg_Pre'.
+```{r calculatemean-data, echo=TRUE}
+df <- df %>%
+        mutate(Avg_Pre=rowMeans(.[13:19], na.rm=TRUE))
+head(df)
+```
+\
+Select fields 'Player_Name', 'Player_State', 'Total_Number_of_Point', 'Player_Pre', and 'Avg_Pre' and put those data into the final data frame to export a csv file.
+```{r finaltable-data, echo=TRUE}
+df_final <- df %>%
+        select('Player_Name','Player_State','Total_Number_of_Point','Player_Pre','Avg_Pre')
+df_final
+```
+\
+Exports final data frame to CSV file.
+```{r exporttoCSV-data, echo=TRUE}
+write.csv(df_final, file='chess_rating.csv')
+```
+
+[Github-https://github.com/blacksmilez/DATA607/blob/main/Project1/](https://github.com/blacksmilez/DATA607/blob/main/Project1/)
