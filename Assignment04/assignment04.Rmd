@@ -3,10 +3,10 @@ title: "Assignment 04"
 author: "Ted Kim (Team Member: Seung Min Song)"
 date: "2022-09-28"
 output:
-  html_document:
-    df_print: paged
   pdf_document: 
     latex_engine: xelatex
+  html_document:
+    df_print: paged
 fontsize: 10pt
 linestretch: 1.5
 ---
@@ -23,7 +23,7 @@ options(dplyr.summarise.inform = FALSE)
 
 #### 1. Data Read and Transform\
 Retrieve data from csv file into a data table *dt_wider*.
-```{r}
+```{r, warning = FALSE}
 dt_wider <- as.data.table(read.csv('https://raw.githubusercontent.com/blacksmilez/DATA607/main/Assignment04/data.csv'))
 ```
 \
