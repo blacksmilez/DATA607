@@ -1,0 +1,121 @@
+---
+title: "Assignment 04"
+author: "Ted Kim (Team Member: Seung Min Song)"
+date: "2022-09-28"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+fontsize: 10pt
+linestretch: 1.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(ggplot2)
+options(dplyr.summarise.inform = FALSE)
+```
+\
+
+#### 1. Data Read and Transform\
+Retrieve data from csv file into a data table *dt_wider*.
+```{r}
+dt_wider <- as.data.table(read.csv('https://raw.githubusercontent.com/blacksmilez/DATA607/main/Assignment04/data.csv'))
+```
+\
+Define the names of empty columns 1 and 2 with column names *Airlines* and *Status*.
+```{r}
+colnames(dt_wider)[1:2] = c('Airlines', 'Status')
+dt_wider
+```
+\
+Fill in the empty Airlines cells (probably two rows combined) with the cell value directly above.\
+[RDocumentation. := Assignment by reference](https://www.rdocumentation.org/packages/data.table/versions/1.14.2/topics/%3A%3D)\
+[RDocumentation. shift Fast lead/lag for vectors and lists](https://www.rdocumentation.org/packages/data.table/versions/1.14.2/topics/shift)
+```{r}
+dt_wider[, Airlines := ifelse(Airlines != '', Airlines, shift(Airlines))]
+dt_wider
+```
+\
+Use pivit_loger( ) function to create new column named *Air_Port* and insert city name into *Air_Port* column.
+```{r}
+dt_long <- dt_wider %>%
+              pivot_longer(
+              cols = c('Los_Angeles', 'Phoenix', 'San_Diego', 'San_Francisco', 'Seattle'),
+              names_to = 'Air_Port',
+              values_to = 'Flights')
+dt_long
+```
+\
+
+#### 2. Analysis for Arrival Delays\
+To perform analysis to compare the arrival delays for the two airlines, we tried to see the delayed frequency for both airlines and see which airports have higher delayed rate than the average.\
+
+A. Calculate the **delayed_rate** percentage of each carrier for each city.
+```{r delayedrate-data, echo=TRUE}
+dt_summary <- dt_long %>%
+                group_by(Airlines, Air_Port) %>%
+                summarise(
+                  on_time = Flights[Status == 'on time'],
+                  delayed = Flights[Status == 'delayed'],
+                  total = Flights[Status == 'delayed'] + Flights[Status == 'on time'],
+                  delayed_rate = Flights[Status == 'delayed'] 
+                    / (Flights[Status == 'delayed'] + Flights[Status == 'on time']))
+dt_summary
+```
+\
+B. ggplot to draw a geom_bar graph to compare two carriers.
+```{r delpayedrateggplot-data, echo=TRUE}
+ggplot(data = dt_summary, aes(x = Air_Port, y = delayed_rate, 
+                              fill = Airlines, color = Airlines )) + 
+  geom_bar(stat='identity', position='dodge') +
+  scale_color_manual(values = c('SteelBlue', 'OliveDrab')) + 
+  scale_fill_manual(values = c('LightSteelBlue', 'DarkSeaGreen'))  
+```
+\
+C. Calculate the mean delayed for each carrier. And, check whether the airports' delayed rate is above or below average.
+```{r meandelay-data, echo=TRUE}
+dt_summary <- dt_summary %>%
+   group_by(Airlines) %>%
+    mutate(
+      mean_delay = mean(delayed_rate),
+      above_below_avg = ifelse(delayed_rate > mean(delayed_rate), 'above', 'below')
+    )
+
+dt_summary
+```
+\
+Draw geom_bar graph to compare Alaska airline's delay frequency in each airport with average delay rate.
+```{r}
+mean_delay = unique(dt_summary[dt_summary$Airlines == 'ALASKA',]$mean_delay)
+p <- dt_summary %>%
+        filter(Airlines == 'ALASKA') %>%
+          ggplot(aes(x = Air_Port, y = delayed_rate)) + 
+            ggtitle('ALASKA') +
+            geom_bar(stat = 'identity', color = 'SteelBlue',
+                     fill = 'LightSteelBlue', width = 0.5)
+p + geom_hline(yintercept = unique(mean_delay), linetype='dashed', color = 'IndianRed')
+```
+\
+Draw geom_bar graph to compare AM West airline's delay frequency in each airport with average delay rate.
+```{r}
+mean_delay = unique(dt_summary[dt_summary$Airlines == 'AM WEST',]$mean_delay)
+p <- dt_summary %>%
+        filter(Airlines == 'AM WEST') %>%
+          ggplot(aes(x = Air_Port, y = delayed_rate)) + 
+            ggtitle('AM WEST') +
+            geom_bar(stat = 'identity', color = 'OliveDrab',
+                     fill = 'DarkSeaGreen', width = 0.5)
+p + geom_hline(yintercept = unique(mean_delay), linetype='dashed', color = 'IndianRed')
+```
+\
+
+#### 3. Conclusion\
+AM West has a higher delay frequency in every city than Alaska, and AM West has a higher average delay percentage than Alaska. Both airlines have two airports above average and three below average. San Francisco and Seattle are the most delayed cities based on this data set. Moreover, this data set is not sufficient to clearly identify which airline is better in general. This could be analyzed deeper if it contains the year, month, departure delay, and arrival delay data. Year and month data is useful in analyzing trends over time or comparing seasonal airline performance. Departure delay and arrival delay data are useful to spectate how severe the delay is. Because to some people, a delay of five to ten minutes may not be considered a delay. Therefore, if there is no big difference in price and service, Alaska with fewer delays looks better than AM West.
+
+* [GitHub - https://github.com/blacksmilez/DATA607/tree/main/Assignment04](https://github.com/blacksmilez/DATA607/tree/main/Assignment04)
+* RPubs - https://rpubs.com/blacksmilez/943744
