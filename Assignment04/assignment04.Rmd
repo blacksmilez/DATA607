@@ -3,10 +3,10 @@ title: "Assignment 04"
 author: "Ted Kim (Team Member: Seung Min Song)"
 date: "2022-09-28"
 output:
-  pdf_document: 
-    latex_engine: xelatex
   html_document:
     df_print: paged
+  pdf_document: 
+    latex_engine: xelatex
 fontsize: 10pt
 linestretch: 1.5
 ---
@@ -118,4 +118,4 @@ p + geom_hline(yintercept = unique(mean_delay), linetype='dashed', color = 'Indi
 AM West has a higher delay frequency in every city than Alaska, and AM West has a higher average delay percentage than Alaska. Both airlines have two airports above average and three below average. San Francisco and Seattle are the most delayed cities based on this data set. Moreover, this data set is not sufficient to clearly identify which airline is better in general. This could be analyzed deeper if it contains the year, month, departure delay, and arrival delay data. Year and month data is useful in analyzing trends over time or comparing seasonal airline performance. Departure delay and arrival delay data are useful to spectate how severe the delay is. Because to some people, a delay of five to ten minutes may not be considered a delay. Therefore, if there is no big difference in price and service, Alaska with fewer delays looks better than AM West.
 
 * [GitHub - https://github.com/blacksmilez/DATA607/tree/main/Assignment04](https://github.com/blacksmilez/DATA607/tree/main/Assignment04)
-* RPubs - https://rpubs.com/blacksmilez/943744
+* RPubs - https://rpubs.com/blacksmilez/951635
