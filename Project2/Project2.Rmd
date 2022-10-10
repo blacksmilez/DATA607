@@ -1,0 +1,309 @@
+---
+title: "Project2"
+author: "Ted Kim & Seung Min Song"
+date: "2022-10-04"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+fontsize: 10pt
+linestretch: 1.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages('scales', repos = "http://cran.us.r-project.org")
+library(tidyr)
+library(dplyr)
+library(data.table)
+library(stringr)
+library(scales)
+library(ggplot2)
+```
+\
+
+#### 1. Joyce Aldrich's Real GDP by County 
+Comparing all industies GDP grow rate for each county\
+
+Read csv file into a data frame **real_dgp_by_county**. The first three rows are headers, therefore set the header option to *False*.
+```{r}
+real_gdp_by_county <- read.csv('./gdp_by_county.csv', header = FALSE, sep = ',')
+head(real_gdp_by_county)
+```
+\
+Reset the header in the data frame. Use first row value for column one trough five and use third row value for column six through nine.
+```{r}
+header <- real_gdp_by_county[1, ] %>%
+            select(c(1:5))
+header <- unlist(c(header, real_gdp_by_county[3, ] %>%
+                            select(c(6:9))))
+colnames(real_gdp_by_county) = header
+head(real_gdp_by_county)
+```
+\
+Use *slice( )* function to remove unnecessary rows from the data frame. Remove rows one to three which overlap the header and the last four rows which is not relevant to current data.
+```{r}
+real_gdp_by_county <- real_gdp_by_county %>%
+                        slice(4:(n() - 4))
+head(real_gdp_by_county)
+tail(real_gdp_by_county)
+```
+\
+Normalize data frame by three data frame, *df_county*, *df_industry_name*, and *df_real_gdf_wider*. Remove duplicated row and use *unique( )* function to make it unique.
+```{r}
+df_county <- unique(real_gdp_by_county %>%
+                      select(c(1:3))) #FIPS, CountyName, Postal
+head(df_county)
+
+df_industry_name <- unique(real_gdp_by_county %>%
+                      select(c(4:5))) #LineCode, IndustryName
+head(df_industry_name)
+
+df_real_gdf_wider <- real_gdp_by_county %>%
+                        select(c(1, 4, 6:9)) #FIPS, LineCode, '2012', '2013', '2014', '2015'
+head(df_real_gdf_wider)
+```
+\
+Transfer into a tidy data frame. After that, Use *pivot_longer( )* function to pivot from column *2012* to last column *2015*. Did not use *values_drop_na = TRUE* since there are no cells with NA value. Change all values with *D* to *0* after the pivot. \
+(D) Not shown to avoid disclosure of confidential information, but the estimates for this item are included in the totals
+```{r}
+df_real_gdf_longer <- df_real_gdf_wider %>%
+                        pivot_longer(
+                          cols = colnames(df_real_gdf_wider)[-c(1,2)],
+                          names_to = 'Year',
+                          values_to = 'RealGDP'
+                        ) %>%
+                        mutate(
+                          RealGDP = ifelse(RealGDP == '(D)', 0, as.double(RealGDP))
+                        )
+head(df_real_gdf_longer)
+tail(df_real_gdf_longer)
+```
+\
+Convert *Year* and *RealGDP* data type; Character to double.
+```{r}
+df_real_gdf_longer$Year = as.numeric(df_real_gdf_longer$Year)
+df_real_gdf_longer$RealGDP = as.numeric(df_real_gdf_longer$RealGDP)
+```
+\
+Use *merge( )* to match *FIPS* and *Countyname*. Calculate *LineCode 1* (all industries) growth rate for each county. Replace *NA* value with *0*.
+```{r}
+df_real_gdf_longer <- merge(x = df_real_gdf_longer, y = df_county, by = 'FIPS')  %>%
+  group_by(FIPS, LineCode) %>%
+    mutate(
+      Prev_GDP = ifelse(is.na(lag(RealGDP)), 0, lag(RealGDP)),
+      Diff_growth = ifelse(is.na(lag(RealGDP)), 0, RealGDP - lag(RealGDP)),
+      Rate_growth = ifelse(is.na(lag(RealGDP)), 0, round((RealGDP / lag(RealGDP) - 1) * 100, digits = 2))
+      )
+df_real_gdf_longer    
+```
+\
+Use *ggplot( )* + *geom_point* + *geom_label* to compare 2014 and 2015's all industries' summarized GDP growth rate. *geom_abline* displays the red line in the graph and any blue dots above the red line indicate a positive growth rate and blue dots below the red line indicate a negative growth rate. Most of the county's GDP increased comared to 2014. Most of the county falls in between 0e+00 and 2e+08.
+```{r warning = FALSE}
+df_real_gdf_longer %>%
+  filter(LineCode == '1', Postal == 'NY', Year == 2015) %>%
+  ggplot(aes(x = Prev_GDP, y = RealGDP, label = Countyname), color = 'SteelBlue') + 
+  geom_point() +
+  geom_label(
+    nudge_x = 0.25, nudge_y = 0.25, 
+    check_overlap = T
+  ) +
+  geom_abline(intercept = 0, slope = 1, size = 0.5, color = 'IndianRed') + 
+  labs(
+    x = 'Y2014',
+    y = 'Y2015'
+  )
+```
+\
+Use 2013, 2014, and 2015 Queens, Brooklyn, and the Bronx's all industry's GDP growth rate and compare. Do not have to use 2012 because it has nothing to compare with. 
+```{r}
+counties <- c('Bronx', 'Queens', 'Kings')
+df_real_gdf_longer %>%
+  filter(LineCode == '1', Year != 2012, Postal == 'NY', Countyname %in% counties) %>%
+  ggplot(aes(x = Year, y = RealGDP, fill = Countyname)) + 
+    geom_bar(stat = 'identity', position = 'dodge') +
+    scale_color_manual(values = c('SteelBlue', 'OliveDrab', 'Coral')) +
+    scale_fill_manual(values = c('LightSteelBlue', 'DarkSeaGreen', 'LightSalmon'))
+```
+
+
+#### 2. Jawaid Hakim's Pharmaceutical Drug Spending by Countries  
+An interesting analysis would be to plot the growth in spend by country over time, and comparison of growth in spend between countries.\
+
+Read csv file into a data frame **drug_spend_wider**. Only the first row is head, therefore set the header option to *True*.
+```{r}
+drug_spend_wider <- read.csv('./drug_spending.csv', header = TRUE, sep = ',')
+head(drug_spend_wider)
+```
+\
+Transfer into a tidy data frame. Remove column 6 named FLAG_CODES in *drug_spend_wider* data frame. Use *pivot_longer( )* function to pivot from column *PC_HEALTHXP* to last column *TOTAL SPEND*. Did not use *values_drop_na = TRUE* since there are no cells with NA value.\
+```{r}
+drug_spend_longer <- drug_spend_wider %>%
+                        select(-c(6)) %>%
+                        pivot_longer(
+                          cols = colnames(drug_spend_wider)[-c(1,2, 6)],
+                          names_to = 'Measure',
+                          values_to = 'Value'
+                        )
+head(drug_spend_longer)
+tail(drug_spend_longer)
+```
+\
+Calculate the total spending rate for each country. Compare with data from 10 years ago.
+```{r}
+drug_spend_longer <- drug_spend_longer %>%
+  group_by(LOCATION) %>%
+  filter(Measure =='TOTAL_SPEND')  %>%
+    mutate(
+      Prev_spend = ifelse(is.na(lag(Value, n = 10)), 0, lag(Value, n = 10)),
+      Diff_spend = Value - lag(Value),
+      Rate_percent = round((Value / lag(Value) - 1) * 100, digits = 2)
+      )
+drug_spend_longer  
+```
+\
+Use *ggplot()* + *geom_point* to Compare 2004 and 2014. *geom_abline* displays the red line in the graph. Any blue dots above the red line indicate a positive spending rate and blue dots below the red line indicate a negative spending rate. Most of the nation spent more in 2014 compare to 2004. 
+```{r}
+drug_spend_longer %>%
+  filter(TIME == 2014) %>%
+  ggplot(aes(x = Prev_spend, y = Value, label = LOCATION), color = 'SteelBlue') + 
+  geom_point() +
+  geom_label(
+    nudge_x = 0.25, nudge_y = 0.25, 
+    check_overlap = T
+  ) +
+  geom_abline(intercept = 0, slope = 1, size = 0.5, color = 'IndianRed') + 
+  labs(
+    x = 'Y2004',
+    y = 'Y2014'
+  )
+```
+\
+Compare drug spending for G7 country in a 10-year cycle. Overall, drug spending in the US is significantly higher than other g7 countries, and drug spending in g7 countries has also steadily increased.
+```{r}
+#DEU: Germany, GBR: the United Kingdom
+G7 <- c('CAN', 'FRA', 'DEU', 'ITA', 'JPN', 'GBR', 'USA')
+drug_spend_longer %>%
+  filter(LOCATION %in% G7, TIME > 2004, TIME < 2015) %>%
+  ggplot(aes(x = TIME, y = Value, color = LOCATION)) + 
+    geom_line() +
+    labs(
+      x = 'Year',
+      y = 'Spent'
+    )
+
+```
+
+#### 3. Benjamin Inbar's Global GDP Dataset 1960-2021 \
+One interesting analysis would be to get the % change year on year, per country, or per region.\
+
+Read csv file into a data frame **global_gdp**. Only the first row is head, therefore set the header option to *True*.
+```{r}
+global_gdp <- read.csv('./global_gdp_1960_2021.csv', header = TRUE, sep = ',')
+head(global_gdp)
+```
+\
+Remove column 3 and 4 cause it is all the same value. All column 3 values are GDP *(current US$)* and column 4 values are *NY.GDP.MKTP.CD*.
+```{r}
+global_gdp <- global_gdp %>%
+                select(-c(3:4))
+head(global_gdp)
+```
+\
+Change *.* in the header to *_* and remove *X* in front of years.
+```{r}
+colnames(global_gdp) <- colnames(global_gdp) %>%
+                          str_replace_all('\\.', '_') %>%
+                          str_replace_all('X(?=\\d)', '')
+head(global_gdp)
+tail(global_gdp)
+```
+\
+Transfer into a tidy data frame. Use *pivot_longer( )* function to pivot from column 3 *1960* to last column *2021*. Exclude cell with NA value while pivoting.
+```{r}
+global_gdp_longer <- global_gdp %>%
+                        pivot_longer(
+                          cols = colnames(global_gdp)[-c(1,2)],
+                          names_to = 'Year',
+                          values_to = 'GDP',
+                          values_drop_na = TRUE
+                        )
+head(global_gdp_longer)
+tail(global_gdp_longer)
+```
+\
+Convert *Year* data type; Character to double.
+```{r}
+global_gdp_longer$Year = as.numeric(global_gdp_longer$Year)
+```
+\
+Calculate the growth rate for each country.
+```{r}
+global_gdp_longer <- global_gdp_longer %>%
+  group_by(Country_Code) %>%
+    mutate(
+      Prev_10_GDP = ifelse(is.na(lag(GDP, n = 10)), 0, lag(GDP, n = 10)),
+#      Prev_GDP = ifelse(is.na(lag(GDP)), 0, lag(GDP)),
+#      Diff_GDP = GDP - lag(GDP),
+#      Rate_percent = round((GDP / lag(GDP) - 1) * 100, digits = 2)
+      Diff_growth = ifelse(is.na(lag(GDP)), 0, GDP - lag(GDP)),
+      Rate_percent = ifelse(is.na(lag(GDP)), 0, round((GDP / lag(GDP) - 1) * 100, digits = 2))
+    )
+global_gdp_longer  
+```
+\
+Compare 2010 and 2020. The graph shows the GDP of developed countries continued to rise over time. Especially, the USA and China's GDP grew strongly. However, underdeveloped countries did not grow.
+```{r}
+exclude <- c('WLD', 'OED', 'PST', 'EAP', 'EAR', 'EAS', 'ECA', 'ECS', 'FCS', 'HPC', 
+             'UMC', 'EUU', 'EMU', 'LMC', 'TLA', 'TEA', 'HIC', 'NAC', 'IBT', 'MIC',
+             'LTE', 'LMY', 'LCN', 'LDC', 'TEC', 'TSA', 'TMN', 'TSS', 'IBD', 'LAC',
+             'SAS', 'MEA', 'SSF')
+global_gdp_longer %>%
+  filter(Year == 2020, !(Country_Code %in% exclude)) %>%
+  ggplot(aes(x = Prev_10_GDP, y = GDP, label = Country_Code), color = 'SteelBlue') + 
+  geom_point() +
+  geom_label(
+    nudge_x = 0.25, nudge_y = 0.25, 
+    check_overlap = T
+  ) +
+  geom_abline(intercept = 0, slope = 1, size = 0.5, color = 'IndianRed') + 
+  labs(
+    x = 'Y2010',
+    y = 'Y2020'
+  )
+```
+\
+Compare GDP growth for G7 country in a 10-year cycle. In 2008 there was the subprime mortgage crisis, and in 2020 there was the corona virus pandemic.
+```{r}
+#DEU: Germany, GBR: the United Kingdom
+G7 <- c('CAN', 'FRA', 'DEU', 'ITA', 'JPN', 'GBR', 'USA')
+global_gdp_longer %>%
+  filter(Country_Code %in% G7, Year > 1999, Year < 2021) %>%
+  ggplot(aes(x = Year, y = Rate_percent, color = Country_Name)) +
+    geom_abline(intercept = 0, slope = 0, size = 0.5, color = 'IndianRed')+
+      geom_line() +
+      labs(
+        x = 'Year',
+        y = 'Rate_percent'
+      )
+```
+
+```{r}
+#DEU: Germany, GBR: the United Kingdom
+G7 <- c('USA')
+global_gdp_longer %>%
+  filter(Country_Code %in% G7, Year > 1999, Year < 2021) %>%
+  ggplot(aes(x = Year, y = Rate_percent, color = Country_Name)) +
+    geom_abline(intercept = 0, slope = 0, size = 0.5, color = 'IndianRed')+
+      geom_line() +
+      labs(
+        x = 'Year',
+        y = 'Rate_percent'
+      )
+```
+
+* [GitHub - https://github.com/blacksmilez/DATA607/tree/main/Project2](https://github.com/blacksmilez/DATA607/tree/main/Project2)
+* RPubs - https://rpubs.com/blacksmilez/953864
+
+
