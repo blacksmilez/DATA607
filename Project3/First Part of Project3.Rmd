@@ -37,7 +37,7 @@ See the data dictionary file in the Attachments section of the OpenData website 
 
 **NYC OPEN DATA FIELD DIFINITION**
 ```{r echo = FALSE, results = TRUE}
-read.csv('NYC_OPEN_DATA_FIELD_DEFINITION.csv')
+read.csv('https://github.com/blacksmilez/DATA607/blob/fb609fca13e514d4698bd7f643f20f74bcef7bcf/Project3/NYC_OPEN_DATA_FIELD_DEFINITION.csv')
 ```
 \
 
@@ -45,7 +45,7 @@ read.csv('NYC_OPEN_DATA_FIELD_DEFINITION.csv')
 #### Entity-Relationship diagram \
 
 **ERD DRAFT**
-![](ERD_DRAFT.png)
+![]([ERD_DRAFT.png](https://github.com/blacksmilez/DATA607/blob/fb609fca13e514d4698bd7f643f20f74bcef7bcf/Project3/ERD_DRAFT.png))
 
 
 
