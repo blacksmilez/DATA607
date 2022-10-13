@@ -21,8 +21,8 @@ Daria Dubovskaia, Wilson Chau, Seung Min Song, Ted Kim
 
 #### Collaboration Tools \
 please brief here...\
-communication:\
-code sharing:\
+communication: Slack, Gmail
+code sharing: github
 project documentation:\
 \
 
