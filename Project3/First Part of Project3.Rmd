@@ -44,6 +44,8 @@ read.csv('NYC_OPEN_DATA_FIELD_DEFINITION.csv')
 
 #### Entity-Relationship diagram \
 
+**ERD DRAFT**
+![](ERD_DRAFT.png)
 
 
 
