@@ -8,6 +8,7 @@ output:
 fontsize: 10pt
 linestretch: 1.5
 ---
+rpubs: <https://rpubs.com/seungm1nsong/956997>
 
 ```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
