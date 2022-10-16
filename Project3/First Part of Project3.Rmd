@@ -16,8 +16,10 @@ library(dplyr)
 
 ### Objective \
 This is a project for your entire class section to work on together, since being able to work effectively on a virtual team is a key “soft skill” for data scientists. <br>
-This is a project for your entire class section to work on together, since being able to work effectively on a virtual team is a 
-key “soft skill” for data scientists. 
+W. Edwards Deming said, “In God we trust, all others must bring data.” Please use data to answer the question, 
+“Which are the most valued data science skills?” Consider your work as an exploration; there is not necessarily a “right 
+answer.”
+
 
 ### Group Members 
 1. Daria Dubovskaia
@@ -29,11 +31,11 @@ key “soft skill” for data scientists.
 ### Collaboration Tools \
 We have chosen the most common collaboration tools to work on the project. \
 For the communication, the team will use a messaging program, **Slack**, <https://slack.com/> \
-Project management will be organized via platform for software development and version control, **GitHub**, <https://github.com/> \
+Project management will be organized via platform for software development and version control, **GitHub**, <https://github.com/blacksmilez/DATA607/tree/main/Project3> \
 As well as a code sharing will also be organized via **GitHub** since team members can change the code and commit changes to the general file. \
 Since the assignment is including the work with databases, we have decided to use **Microsoft Azure Database** for MySQL Database, <https://azure.microsoft.com>. As a result, all teammates will be able to work together on the same database in real time and access the latest version of our database. \
 Project documentation and coding will be done by each team member via an integrated development environment for R, **RStudio**\
-**Rpubs** will be used for easy web publishing from R to present the work to the Professor. \
+**Rpubs** will be used for easy web publishing from R to present the work to the Professor,  \
 
 \
 
