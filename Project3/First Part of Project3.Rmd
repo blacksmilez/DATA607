@@ -31,15 +31,14 @@ answer.”
 
 ### Collaboration Tools \
 We have chosen the most common collaboration tools to work on the project. \
-For the communication, the team will use a messaging program, **Slack**, <https://slack.com/> \
-Project management will be organized via platform for software development and version control, **GitHub**, <https://github.com/blacksmilez/DATA607/tree/main/Project3> \
+For the communication, the team will use a messaging program, **Slack**, <https://slack.com/>. \
+Project management will be organized via platform for software development and version control, **GitHub**, <https://github.com/blacksmilez/DATA607/tree/main/Project3>. Project progress will be managed by **GitHub Board**.\
 As well as a code sharing will also be organized via **GitHub** since team members can change the code and commit changes to the general file. \
 Since the assignment is including the work with databases, we have decided to use **Microsoft Azure Database** for MySQL Database, <https://azure.microsoft.com>. As a result, all teammates will be able to work together on the same database in real time and access the latest version of our database. \
 Project documentation and coding will be done by each team member via an integrated development environment for R, **RStudio**\
 **Rpubs** will be used for easy web publishing from R to present the work to the Professor, <https://rpubs.com/seungm1nsong>. \
-
+The team chose Slack and GitHub as the main collaboration tools because all four members are comfortable using those two tools. Using unfamiliar tools will reduce efficiency and slow the project progress. \
 \
-
 ### Data Source \ 
 **DOHMH New York City Restaurant Inspection Results.** \
 (DOHMH_New_York_City_Restaurant_Inspection_Results.csv 102MB) \
