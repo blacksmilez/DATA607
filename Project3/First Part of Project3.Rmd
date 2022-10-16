@@ -22,7 +22,7 @@ Daria Dubovskaia, Wilson Chau, Seung Min Song, Ted Kim
 
 #### Collaboration Tools \
 please brief here...\
-communication: github Board, Slack, Gmail\
+communication: github Board, Slack\
 code sharing: github\
 project documentation: RStudio\
 database: Microsoft Azure for MySQL
