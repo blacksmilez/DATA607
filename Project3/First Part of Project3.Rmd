@@ -57,7 +57,7 @@ field_definition
 \
 
 ### Entity-Relationship diagram \
-A logical model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
+A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
 <p align="center">
   <img src="https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/erd.png">
 </p>
