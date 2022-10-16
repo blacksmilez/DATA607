@@ -16,10 +16,7 @@ library(dplyr)
 ```
 
 ### Objective \
-This is a project for your entire class section to work on together, since being able to work effectively on a virtual team is a key “soft skill” for data scientists. <br>
-W. Edwards Deming said, “In God we trust, all others must bring data.” Please use data to answer the question, 
-“Which are the most valued data science skills?” Consider your work as an exploration; there is not necessarily a “right 
-answer.”
+Understand the value of collaboration to strengthen team members' soft skills. Expand knowledge of data collecting, tidying, transformations, and exploratory data analysis in R. \
 
 
 ### Group Members 
