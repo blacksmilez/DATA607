@@ -22,9 +22,9 @@ Daria Dubovskaia, Wilson Chau, Seung Min Song, Ted Kim
 
 #### Collaboration Tools \
 please brief here...\
-communication: Slack, Gmail
-code sharing: github
-project documentation:\
+communication: Slack, Gmail\
+code sharing: github\
+project documentation: RStudio\
 \
 
 #### Data Source \ in progress...
@@ -37,6 +37,7 @@ This dataset and the information on the Health Department’s Restaurant Grading
 See the data dictionary file in the Attachments section of the OpenData website for a summary of data fields and allowable values.\
 
 **NYC OPEN DATA FIELD DIFINITION**
+Download the data as CSV and load the CSV in R. 
 ```{r echo = FALSE, results = TRUE}
 read.csv('https://github.com/blacksmilez/DATA607/blob/fb609fca13e514d4698bd7f643f20f74bcef7bcf/Project3/NYC_OPEN_DATA_FIELD_DEFINITION.csv')
 ```
