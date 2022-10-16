@@ -25,6 +25,7 @@ please brief here...\
 communication: Slack, Gmail\
 code sharing: github\
 project documentation: RStudio\
+database: Microsoft Azure for MySQL
 \
 
 #### Data Source \ in progress...
