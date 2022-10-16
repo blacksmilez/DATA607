@@ -1,55 +1,66 @@
-
 ---
 title: "Project 3"
-author: "Team"
-date: "2022-10-12"
 output:
-  pdf_document: 
-    latex_engine: xelatex
   html_document:
     df_print: paged
+  pdf_document: 
+    latex_engine: xelatex
 fontsize: 10pt
 linestretch: 1.5
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
-#### Group Member \
-Daria Dubovskaia, Wilson Chau, Seung Min Song, Ted Kim
+### Objective \
+This is a project for your entire class section to work on together, since being able to work effectively on a virtual team is a key “soft skill” for data scientists. <br>
+This is a project for your entire class section to work on together, since being able to work effectively on a virtual team is a 
+key “soft skill” for data scientists. 
+
+### Group Members 
+1. Daria Dubovskaia
+2. Wilson Chau
+3. Seung Min Song
+4. Ted Kim
+
+
+### Collaboration Tools \
+We have chosen the most common collaboration tools to work on the project. \
+For the communication, the team will use a messaging program, **Slack**, <https://slack.com/> \
+Project management will be organized via platform for software development and version control, **GitHub**, <https://github.com/> \
+As well as a code sharing will also be organized via **GitHub** since team members can change the code and commit changes to the general file. \
+Since the assignment is including the work with databases, we have decided to use **Microsoft Azure Database** for MySQL Database, <https://azure.microsoft.com>. As a result, all teammates will be able to work together on the same database in real time and access the latest version of our database. \
+Project documentation and coding will be done by each team member via an integrated development environment for R, **RStudio**\
+
 \
 
-#### Collaboration Tools \
-communication: Slack\
-project mangement: GitHub Board\
-code sharing: github\
-project documentation: RStudio\
-database: Microsoft Azure Database for MySQL Database
-\
+### Data Source \ 
+**DOHMH New York City Restaurant Inspection Results.** \
+(DOHMH_New_York_City_Restaurant_Inspection_Results.csv 102MB) \
+The data will be downloaded as CSV file and loaded in R using read.csv() function. The source of the dataset: <https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j> \
+The dataset contains 239,000 observations of 27 variables. \
+The dataset contains every sustained or not yet adjudicated violation citation from every full or special program inspection conducted up to three years prior to the most recent inspection for restaurants and college cafeterias in an active status on the RECORD DATE (date of the data pull). When an inspection results in more than one violation, values for associated fields are repeated for each additional violation record. Establishments are uniquely identified by their CAMIS (record ID) number. Keep in mind that thousands of restaurants start business and go out of business every year; only restaurants in an active status are included in the dataset. \
+Records are also included for each restaurant that has applied for a permit but has not yet been inspected and for inspections resulting in no violations. Establishments with inspection date of 1/1/1900 are new establishments that have not yet received an inspection. Restaurants that received no violations are represented by a single row and coded as having no violations using the ACTION field. \
+Because this dataset is compiled from several large administrative data systems, it contains some illogical values that could be a result of data entry or transfer errors. Data may also be missing. \
+This dataset and the information on the Health Department’s Restaurant Grading website come from the same data source. The Health Department’s Restaurant Grading website is available via the link below:
+<http://www1.nyc.gov/site/doh/services/restaurant-grades.page> \
+The description of the columns is provided below
 
-#### Data Source \ in progress...
-**DOHMH New York City Restaurant Inspection Results.** (DOHMH_New_York_City_Restaurant_Inspection_Results.csv 102MB) \
-The dataset contains every sustained or not yet adjudicated violation citation from every full or special program inspection conducted up to three years prior to the most recent inspection for restaurants and college cafeterias in an active status on the RECORD DATE (date of the data pull). When an inspection results in more than one violation, values for associated fields are repeated for each additional violation record. Establishments are uniquely identified by their CAMIS (record ID) number. Keep in mind that thousands of restaurants start business and go out of business every year; only restaurants in an active status are included in the dataset.
-Records are also included for each restaurant that has applied for a permit but has not yet been inspected and for inspections resulting in no violations. Establishments with inspection date of 1/1/1900 are new establishments that have not yet received an inspection. Restaurants that received no violations are represented by a single row and coded as having no violations using the ACTION field.
-Because this dataset is compiled from several large administrative data systems, it contains some illogical values that could be a result of data entry or transfer errors. Data may also be missing.
-This dataset and the information on the Health Department’s Restaurant Grading website come from the same data source. The Health Department’s Restaurant Grading website is here:
-<http://www1.nyc.gov/site/doh/services/restaurant-grades.page>
-See the data dictionary file in the Attachments section of the OpenData website for a summary of data fields and allowable values.\
-Finally, download the data as CSV and load the CSV file in R. 
-
-**NYC OPEN DATA FIELD DIFINITION**
+**NYC open data field definition**
 
 ```{r echo = FALSE, results = TRUE}
-read.csv('https://github.com/blacksmilez/DATA607/blob/fb609fca13e514d4698bd7f643f20f74bcef7bcf/Project3/NYC_OPEN_DATA_FIELD_DEFINITION.csv')
+field_definition <- read.csv('https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/NYC_OPEN_DATA_FIELD_DEFINITION.csv',header=TRUE,sep=",", check.names=FALSE)
+field_definition
 ```
 \
 
-
-#### Entity-Relationship diagram \
-
-**ERD**
-![erd.png](https://github.com/blacksmilez/DATA607/blob/fb609fca13e514d4698bd7f643f20f74bcef7bcf/Project3/erd.png)
+### Entity-Relationship diagram \
+A logical model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/erd.png">
+</p>
 
 
 
