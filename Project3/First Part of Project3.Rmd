@@ -55,7 +55,7 @@ The description of the columns is provided at the link below:
 ### Entity-Relationship diagram \
 A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
 <p align="center">
-  <img src="https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/erd.png">
+ ![](erd.png)
 </p>
 
 
