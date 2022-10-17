@@ -1,6 +1,6 @@
 ---
 title: "Project 3"
-author: " Daria Dubovskaia, Wilson Chau, Ted Kim, Seung Min Song"
+author: " Ted Kim, Seung Min Song, Daria Dubovskaia, Wilson Chau"
 output:
   html_document:
     df_print: paged
@@ -9,8 +9,6 @@ output:
 fontsize: 10pt
 linestretch: 1.5
 ---
-rpubs: <https://rpubs.com/seungm1nsong/956997>
-
 ```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
@@ -34,7 +32,7 @@ Project management will be organized via platform for software development and v
 As well as a code sharing will also be organized via **GitHub** since team members can change the code and commit changes to the general file. \
 Since the assignment is including the work with databases, we have decided to use **Microsoft Azure Database** for MySQL Database, <https://azure.microsoft.com>. As a result, all teammates will be able to work together on the same database in real time and access the latest version of our database. \
 Project documentation and coding will be done by each team member via an integrated development environment for R, **RStudio**\
-**Rpubs** will be used for easy web publishing from R to present the work to the Professor, <https://rpubs.com/seungm1nsong>. \
+**Rpubs** will be used for easy web publishing from R to present the work to the Professor, <https://rpubs.com/seungm1nsong/956997>. \
 The team chose Slack and GitHub as the main collaboration tools because all four members are comfortable using those two tools. Using unfamiliar tools will reduce efficiency and slow the project progress. Moreover, each member has a different background and the project period is relatively short. Therefore, we chose to use familiar tools, GitHub and Slack.\
 \
 
@@ -57,6 +55,3 @@ A physical data model for the normalized database, and an Entity-Relationship (E
 <p align="center">
  ![](erd.png)
 </p>
-
-
-
