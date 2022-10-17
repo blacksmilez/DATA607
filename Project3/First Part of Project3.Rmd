@@ -37,6 +37,7 @@ Project documentation and coding will be done by each team member via an integra
 **Rpubs** will be used for easy web publishing from R to present the work to the Professor, <https://rpubs.com/seungm1nsong>. \
 The team chose Slack and GitHub as the main collaboration tools because all four members are comfortable using those two tools. Using unfamiliar tools will reduce efficiency and slow the project progress. Moreover, each member has a different background and the project period is relatively short. Therefore, we chose to use familiar tools, GitHub and Slack.\
 \
+
 ### Data Source\ 
 **DOHMH New York City Restaurant Inspection Results.** \
 (DOHMH_New_York_City_Restaurant_Inspection_Results.csv 102MB) \
