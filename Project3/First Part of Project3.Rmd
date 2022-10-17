@@ -1,6 +1,6 @@
 ---
 title: "Project 3"
-author: " Ted Kim, Seung Min Song, Daria Dubovskaia, Wilson Chau"
+author: "Daria Dubovskaia, Wilson Chau, Seung Min Song, Ted Kim"
 output:
   html_document:
     df_print: paged
