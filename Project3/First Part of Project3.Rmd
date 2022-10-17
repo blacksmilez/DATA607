@@ -53,7 +53,7 @@ The description of the columns is provided at the link below:
 
 
 ### Entity-Relationship diagram \
-A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
+A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository. On our ER diagram we have a few approaches to doing some analytical deliverable where we can inspect our dataset. One option is going through inspection type with and without the influence of inspection_code. This can give us some correlation where inspection code may have different types of inspection results. Another investigation road we can focus on would be the building and how it can influences some of the inspection results. These types of focuses can give us some insights on how New York Restaurant inspections are being graded and the types of influences that will affect the grading of the inspections for these NYC restaurants.
 <p align="center">
  ![](erd.png)
 </p>
