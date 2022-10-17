@@ -46,15 +46,9 @@ Records are also included for each restaurant that has applied for a permit but 
 Because this dataset is compiled from several large administrative data systems, it contains some illogical values that could be a result of data entry or transfer errors. Data may also be missing. \
 This dataset and the information on the Health Department’s Restaurant Grading website come from the same data source. The Health Department’s Restaurant Grading website is available via the link below:
 <http://www1.nyc.gov/site/doh/services/restaurant-grades.page> \
-The description of the columns is provided below
+The description of the columns is provided at the link below:
+<https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j>
 
-**NYC open data field definition**
-
-```{r echo = FALSE, results = TRUE}
-field_definition <- read.csv('https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/NYC_OPEN_DATA_FIELD_DEFINITION.csv',header=TRUE,sep=",", check.names=FALSE)
-field_definition
-```
-\
 
 ### Entity-Relationship diagram \
 A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository.
