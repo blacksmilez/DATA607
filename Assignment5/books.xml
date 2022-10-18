@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<books>
+	<book>
+		<isbn>9780071819046</isbn>
+		<title>Legendary Service: The Key is to Care</title>
+		<publisher>McGraw-Hill Education</publisher>
+		<publishedDate>2014-04-15</publishedDate>
+		<pageCount>176</pageCount>
+		<categories>Business &amp; Economics</categories>
+		<authors>
+			<author>Victoria Halsey</author>
+			<author>Ken Blanchard</author>
+			<author>Kathy Cuff</author>
+		</authors>
+	</book>
+	<book>
+		<isbn>9780688082499</isbn>
+		<title>The One Minute Teacher</title>
+		<publisher>Harper Collins</publisher>
+		<publishedDate>1988-08-31</publishedDate>
+		<pageCount>116</pageCount>
+		<categories>Education</categories>
+		<authors>
+			<author>Constance Johnson</author>
+		</authors>
+	</book>
+	<book>
+		<isbn>9780688154288</isbn>
+		<title>Gung Ho!</title>
+		<publisher>Harper Collins</publisher>
+		<publishedDate>1997-10-08</publishedDate>
+		<pageCount>216</pageCount>
+		<categories>Business &amp; Economics</categories>
+		<authors>
+			<author>Ken Blanchard</author>
+		</authors>
+	</book>
+	<book>
+		<isbn>9780887306310</isbn>
+		<title>Yes or No</title>
+		<publisher>Harper Collins</publisher>
+		<publishedDate>1993-06-04</publishedDate>
+		<pageCount>116</pageCount>
+		<categories>Business &amp; Economics</categories>
+		<authors>
+			<author>Spencer Johnson</author>
+		</authors>
+	</book>
+</books>

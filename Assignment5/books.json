@@ -1,0 +1,48 @@
+[
+	{
+		"isbn": "9780071819046",
+		"title": "Legendary Service: The Key is to Care",
+		"publisher": "McGraw-Hill Education",
+		"publishedDate": "2014-04-15",
+		"pageCount": 176,
+		"categories": "Business & Economics",
+		"author":  [
+			"Victoria Halsey",
+			"Ken Blanchard",
+			"Kathy Cuff"
+		]
+	},
+	{
+		"isbn": "9780688082499",
+		"title": "The One Minute Teacher",
+		"publisher": "Harper Collins",
+		"publishedDate": "1988-08-31",
+		"pageCount": 116,
+		"categories": "Education",
+		"author":  [
+			"Constance Johnson"
+		]
+	},
+	{
+		"isbn": "9780688154288",
+		"title": "Gung Ho!",
+		"publisher": "Harper Collins",
+		"publishedDate": "1997-10-08",
+		"pageCount": 216,
+		"categories": "Business & Economics",
+		"author":  [
+			"Ken Blanchard"
+		]
+	},
+	{
+		"isbn": "9780887306310",
+		"title": "Yes or No",
+		"publisher": "Harper Collins",
+		"publishedDate": "1993-06-04",
+		"pageCount": 116,
+		"categories": "Business & Economics",
+		"author":  [
+			"Spencer Johnson"
+		]
+	}
+]
