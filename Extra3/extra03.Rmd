@@ -1,0 +1,166 @@
+---
+title: "Extra 3"
+author: "Ted Kim and Seung Min Song"
+date: "2022-10-18"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(openintro)
+library(stringr)
+library(dplyr)
+library(tibble)
+```
+
+##### Read Data \
+Instead of using the header, and load the csv file with making empty cells to NA.
+```{r}
+csv <- read.csv(file = 'https://raw.githubusercontent.com/blacksmilez/DATA607/main/extra2/vaccine.csv', header = FALSE, na.strings=c(" ", ''))
+```
+\
+
+##### Transform for Population \
+Select 1st(Age), 2nd(Population % Not Vax), and 3rd(Population % Fully Vax) column using *select( )* function.
+Use *fill()* function in tidyr package to fill empty cells in the first column with above value.
+Use *add_column( )* function in tibble package to add column *Population* after the first column.
+Use *slice( )* function to remove the first row and insert it into a data frame, pop.
+```{r}
+pop <- csv %>%
+        select(c(1, 2, 3)) %>%
+        fill(V1, .direction = "down") %>%
+        add_column(V4 = str_replace(.[1,2], '\\s%', ''), .after = 'V1') %>%
+        slice(-c(1))
+```
+\
+
+##### Transform for Population %\
+In order to transform the population % use the *slice( )* function to bring the first raw and odd rows.
+Use *mutate_at( )*, *vars( )*, *str_replace( )*, and *str_remove( )* function to massage 2nd(def), 3rd(state), and 4th(number of percent).
+Remove the first row after defining the column name using the value of the first row.
+Pivot after converting the percentage value in character data type to numeric data type.
+```{r}
+pop_p <- slice(pop, c(1, 3, 5)) %>%
+            mutate_at(vars(3, 4), list(~str_remove(., '\\\n%'))) %>%
+            mutate_at(vars(2), list(~paste0(., ' %')))
+
+colnames(pop_p) = pop_p[1,] %>%
+            mutate_at(vars(2), list(~str_replace(., '.*', 'def'))) %>%
+            str_replace_all('\\s', '_')
+
+pop_p <- pop_p %>%
+          slice(-c(1))  %>%
+          mutate_at(vars(3, 4), list(~as.numeric(str_remove(., '%'))/100)) %>%
+          pivot_longer(Not_Vax:Fully_Vax, names_to = 'State', values_to = 'Num')
+
+pop_p
+```
+\
+
+##### Transform for Population\
+In order to transform the population use the *slice( )* function to bring the first raw and even rows.
+use *mutate_at( )*, *vars( )*, and *str_remove( )* function to massage 3rd(state), and 4th(number of percent).
+Remove the first row after defining the column name using the value of the first row.
+Pivot after remove *,* in the column three(Not Vax) and four(Fully Vax), and convert to numeric data type.  
+```{r}
+pop <- slice(pop, c(1, 2, 4)) %>%
+          mutate_at(vars(3, 4), list(~str_remove(., '\\\n%')))
+
+colnames(pop) = pop[1,]  %>%
+          mutate_at(vars(2), list(~str_replace(., '.*', 'def'))) %>%
+            str_replace_all('\\s', '_')
+
+pop <- pop %>%
+        slice(-c(1)) %>%
+        mutate_at(vars(3, 4), list(~as.numeric(gsub(',', '', .)))) %>%
+        pivot_longer(Not_Vax:Fully_Vax, names_to = 'State', values_to = 'Num')
+
+pop
+```
+\
+
+##### Transform for Severe Cases \
+Select 1st(Age), 4th(Severe Case Not Vax), and 5th(Severe Case Fully Vax) column using *select( )* function.
+Use *fill( )* function in tidyr package to fill empty cells in the first column with the value above.
+Use *add_column( )* function in tibble package to add column *Severe Cases per 100K* after the first column. 
+Use *slice( )* function to remove the first, fourth and sixth row and insert it into a data frame, sev.
+Remove the first row after defining the column name using the value of the first row.
+Pivot after converting the character data type value to numeric data type.
+```{r}
+sev <- csv %>%
+          select(c(1, 4, 5)) %>%
+          fill(V1, .direction = "down") %>%
+          add_column(V6 = paste0(.[1,2], ' per 100K'), .after = 'V1') %>%
+          slice(-c(1, 4, 6))
+ 
+colnames(sev) = sev[1,] %>%
+                  mutate_at(vars(3, 4), list(~str_remove_all(., '\\\n.*'))) %>%
+                  mutate_at(vars(2), list(~str_replace(., '.*', 'def'))) %>%
+                  str_replace_all('\\s', '_')
+
+sev <- sev %>%
+        slice(-c(1)) %>%
+        mutate_at(vars(3, 4), list(~as.numeric(.))) %>%
+        pivot_longer(Not_Vax:Fully_Vax, names_to = 'State', values_to = 'Num')
+
+sev
+```
+
+```{r}
+df <- as.data.frame(union(pop, pop_p) %>%
+                     union(sev))
+
+df
+```
+\
+
+##### 1. Total Population \
+Do you have enough information to calculate the total population?  What does this total population represent? \
+Populations in the table represent those who responded to being vaccinated. Therefore, it is necessary to consider the population who did not respond to both sides to know the results of the vaccination and non-vaccination status of the entire population. Use the sum of population and sum of population % to identify the total population for two age groups.
+
+$$
+Total Population = Num of Applicable Population / percentage of Applicable Population
+$$
+```{r}
+df %>%
+  group_by(Age) %>%
+  summarize(
+    Toral_Population =sum(Num[def == 'Population']) / sum(Num[def == 'Population %'])
+  )
+```
+The total population under the age of 50 is 4,795,381, and the total population over the age of 50 is 2,359,709.
+Thus, the total population covered by the vaccine in Israel is 4,795,381 + 2,359,709 = 7,155,090.\
+\
+
+##### 2. Efficacy vs. Disease
+Calculate the Efficacy vs. Disease; Explain your results. \
+According to the formula below, when the *percentage of Fully Vax* increases and the *percentage of Not Vax* decreases, *Efficacy vs. Severe disease* has a negative value. If you look at the results, **0.744** for those under 50, and **-0.696** for those over 50. In other words, the vaccine was 74% effective in the younger population, but the vaccine was not as effective in the elderly.\
+
+$$
+Efficacy vs. severe disease = 1 - (\% fully vaxed severe cases per 100K / \% not vaxed severe cases per 100K)
+$$
+```{r}
+df %>%
+  filter(def == 'Severe Cases per 100K') %>%
+   group_by(Age) %>%
+   summarize(
+     Efficacy_vs_Severe_Disease = 1 - (Num[State == 'Fully_Vax'] / Num[State == 'Not_Vax'])
+   )
+
+```
+
+\
+##### 3. From your calculation of efficacy vs. disease, are you able to compare the rate of severe cases in unvaccinated individuals to that in vaccinated individuals? \
+I am able to compare the rate of severe cases in unvaccinated individuals to that in vaccinated individuals. 
+A value toward -99 means that the vaccine is ineffective, and a value toward 1 means that the vaccine is effective.
+It is unlikely, but in severe cases, if the *percent of Fully Vax* increases as much as possible and approaches 100, and the *percent of Not Vax* decreases as much as possible and approaches 0, the *Efficacy vs. The Severe Disease* value converges to about -99. Conversely, if the *percent of Fully Vax* is reduced as much as possible and the *percent of Not Vax* is increased as much as possible, *Efficacy vs. The value of severe disease* converges to 1.
+\
+
+##### Conclusions.\
+For vaccinated people under the age of 50, the probability of developing the severe disease was reduced by 74% compared to those who aren't vaccinated. However, for those over 50, when they were vaccinated, they were 70% more likely to become seriously ill than when they aren't vaccinated. Errors are caused by people who do not respond.
+
+* [GitHub - https://github.com/blacksmilez/DATA607/tree/main/Extra3](https://github.com/blacksmilez/DATA607/tree/main/Extra3)
+* RPubs - https://rpubs.com/blacksmilez/958362
