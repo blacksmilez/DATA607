@@ -1,4 +1,4 @@
-create table tbl_dba (
+create table if not exists tbl_dba (
     camis    varchar(8) not null,
     dba      varchar(150)   null,
     phone    varchar(12)    null,
