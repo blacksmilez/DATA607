@@ -2,7 +2,7 @@ create table if not exists tbl_building (
     bin                 varchar(7)       not null,	
 --    boro_code           int unsigned default null,	
     boro_code           varchar(1)           null,	
-    building            varchar(15)	         null,	
+    building            varchar(15)          null,	
     street              varchar(50)      not null,	
     zipcode             varchar(5)           null,	
     latitude            decimal(10, 8)       null,	
