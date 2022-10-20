@@ -13,4 +13,4 @@ create table if not exists tbl_building (
     nta                 varchar(4) null,
     primary key(bin),
     foreign key(boro_code) references tbl_boro(boro_code)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8; 
