@@ -1,4 +1,4 @@
-create table tbl_inspection_result (
+create table if not exists tbl_inspection_result (
     camis              varchar(8)       not null,
     inspection_date    date             not null,
     action_code        int unsigned default null,
