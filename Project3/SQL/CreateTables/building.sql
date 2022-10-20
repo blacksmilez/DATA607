@@ -1,4 +1,4 @@
-create table if not exists tbl_building (				
+create table if not exists tbl_building (
     bin                 varchar(7) not null,
     boro_code           varchar(1) null,
     building            varchar(15) null,
