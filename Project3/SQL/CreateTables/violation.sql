@@ -1,4 +1,4 @@
-create table tbl_violation (
+create table if not exists tbl_violation (
     camis                         varchar(8) not null,
     inspection_date               date       not null,
     violation_code                int        not null,
