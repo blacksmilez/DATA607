@@ -1,0 +1,274 @@
+---
+title: "Project3_Data_Load"
+author: "Team Project"
+date: "2022-10-19"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: 
+    latex_engine: xelatex
+fontsize: 10pt
+linestretch: 1.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(stringr)
+library(jsonlite)
+```
+
+
+```{r}
+# Read data from JSON on NYC Open Data, it's contained only 1000 rows.
+#data <- fromJSON('https://data.cityofnewyork.us/resource/43nn-pn8j.json')
+
+# Read data from csv on NYC Open Data, it's contained approx. 239,537 rows. However, sometimes there were connection issues.
+#data <- read.csv(file = 'https://data.cityofnewyork.us/api/views/43nn-pn8j/rows.csv?accessType=DOWNLOAD&bom=true&format=true', header = TRUE)
+
+# Read data from csv on local. Please put csv file into your local folder.
+data <- read.csv(file = 'DOHMH_New_York_City_Restaurant_Inspection_Results.csv', header = TRUE)
+
+# The header of the csv file contains white spaces between characters. Therefore, when reading through read.csv(), the white space is changed to ".(dot)". Replace ".(dot)" with "_(underscore)" for use in the database.
+names(data) <- str_replace_all(tolower(names(data)), '\\.', '_')
+
+# Confirm the number of rows of data read.
+nrow(data)
+
+# Change the output direction to check the column name.
+#glimpse(data)
+```
+
+```{r df_boro}
+# Create a data frame to store the boro_code and boro_name. Since there is a code set by New York City, it is made manually without making it from the data read.
+df_boro <- data.frame(boro_code = c(1, 2, 3, 4, 5),
+                      boro_name = c('Manhattan', 'Bronx', 'Brooklyn', 'Queens', 'Staten Island'))
+df_boro
+nrow(df_boro)
+
+```
+
+```{r df_grade_code}
+# Create a data frame to store the grade_code and grade. Since there is a code set by New York City, it is made manually without making it from the data read.
+df_grade_code <- data.frame(grade_code = c('N', 'A', 'B', 'C', 'Z', 'P'),
+                                 grade = c('Not Yet Graded', 'Grade A', 'Grade B', 'Grade C', 'Grade Pending', 
+                                           'Grade Pending issued on re-opening following an initial inspection that resulted in a closure'))
+df_grade_code
+nrow(df_grade_code)
+
+```
+
+```{r df_critical_flag_code}
+# Create a data frame to store the critical_flag_code and critical_flag. Since there is a code set by New York City, it is made manually without making it from the data read.
+df_critical_flag_code <- data.frame(critical_flag_code = c(1, 2, 3),
+                                    critical_flag = c('Critical', 'Not Critical', 'Not Applicable'))
+
+df_critical_flag_code
+nrow(df_critical_flag_code)
+
+```
+
+```{r df_cuisine_code}
+# Create a data frame to store the cuisine_code and cuisine_description. Among the read data, data whose value in the cuisine_description column is not null or non-blank is selected. After that, make a sequence number using rowid_to_column() and add it to the cuisine_code column. The column cuisine_code may not have a duplicate value.
+cuisine_descriptions = unique(data[!is.na(data$cuisine_description) & str_remove_all(data$cuisine_description, '\\s') != '',]$cuisine_description) 
+df_cuisine_code <- data.frame(cuisine_description = sort(cuisine_descriptions))
+df_cuisine_code <- tibble::rowid_to_column(df_cuisine_code, 'cuisine_code')
+
+df_cuisine_code
+nrow(df_cuisine_code)
+
+```
+
+```{r df_violation_code}
+# Create a data frame to store the violation_code and violation_code_5. Among the read data, data whose value in the violation_code column is not null or non-blank is selected. Update the name of the violation_code column to violation_code_5. After that, make a sequence number using rowid_to_column() and add it to the violation_code column again. The column violation_code may not have a duplicate value.
+df_violation_code <- unique(data %>%
+                              select(c(violation_code)) %>%
+                              filter(!is.na(violation_code) & str_remove_all(violation_code, '\\s') != ''))
+names(df_violation_code) <- paste0(names(df_violation_code), '_5')
+df_violation_code <- tibble::rowid_to_column(df_violation_code, 'violation_code')
+
+df_violation_code
+nrow(df_violation_code)
+
+```
+
+```{r df_violation_description_code}
+# Create a data frame to store the violation_description_code and violation_description. Among the read data, data whose value in the violation_description column is not null is selected. After that, make a sequence number using rowid_to_column() and add it to the violation_description_code column. The column violation_descriptions may not have a duplicate value.
+violation_descriptions = unique(data[!is.na(data$violation_description),]$violation_description) 
+df_violation_description_code <- data.frame(violation_description = sort(violation_descriptions)) %>%
+                                  tibble::rowid_to_column(., 'violation_description_code')
+
+df_violation_description_code
+nrow(df_violation_description_code)
+
+```
+
+```{r df_action_code}
+# Create a data frame to store the action_code and action. Among the read data, data whose value in the action column is not null is selected. After that, make a sequence number using rowid_to_column() and add it to the action_code column. The column action may not have a duplicate value.
+df_action_code <- unique(data %>%
+                              select(c(action)) %>%
+                              filter(!is.na(action))) %>%
+                  tibble::rowid_to_column(., 'action_code')
+
+df_action_code
+nrow(df_action_code)
+
+```
+
+```{r df_inspection_code}
+# Create a data frame to store the inspection_code and inspection_type Among the read data, data whose value in the action column is not null or non-blank is selected. After that, make a sequence number using rowid_to_column() and add it to the inspection_code column. The column inspection_type may not have a duplicate value.
+df_inspection_code <- unique(data %>%
+                              select(c(inspection_type)) %>%
+                              filter(!is.na(inspection_type) & str_remove_all(inspection_type, '\\s') != '')) %>%
+                      tibble::rowid_to_column(., 'inspection_code')
+
+df_inspection_code
+nrow(df_inspection_code)
+
+```
+
+```{r df_inspection_type}
+# Create a data frame to store the camis, inspection_date and inspection_code. Among the read data, data whose value in the inspection_type column is not null is selected. Get inspection_code from data frame df_inspection_code using left_join. After that, inspection_type is excluded from the data frame.
+df_inspection_type <- data %>%
+                        select(c(camis, inspection_date, inspection_type)) %>%
+                        filter(!is.na(inspection_type)) %>%
+                        left_join(., df_inspection_code, by = 'inspection_type') %>%
+                        select(-c(inspection_type))
+
+df_inspection_type
+nrow(df_inspection_type)
+
+```
+
+```{r df_violation}
+# Create a data frame to store the camis, inspection_date, violation_code, violation_description_code and critical_flag_code. Among the read data, data whose value in the violation_code column is not null is selected. Fields related to other tables take key values from each data frame.
+df_violation <- data %>%
+                  select(c(camis, inspection_date, violation_code, violation_description, critical_flag)) %>%
+                  filter(!is.na(violation_code)) %>%
+                  left_join(., df_violation_code, by = c('violation_code' = 'violation_code_5')) %>%
+                  left_join(., df_violation_description_code, by = 'violation_description') %>%
+                  left_join(., df_critical_flag_code, by = 'critical_flag') %>%
+                  select(-c(violation_code, violation_description, critical_flag))
+names(df_violation) <- str_remove_all(names(df_violation), '\\.y')
+
+df_violation
+nrow(df_violation)
+
+```
+
+```{r tbl_inspection_result}
+# Create a data frame to store the camis, inspection_date, action_code, score, grade_code, grade_date, record_date and cuisine_code. Fields related to other tables take key values from each data frame.
+df_inspection_result <- data %>%
+                          select(c(camis, inspection_date, action, score, grade, 
+                                   grade_date, record_date, cuisine_description)) %>%
+                          left_join(., df_action_code, by = 'action') %>%
+                          left_join(., df_cuisine_code, by = 'cuisine_description') %>%
+                          select(-c(action, cuisine_description))
+names(df_inspection_result) <- str_replace_all(names(df_inspection_result), '(?<=grade$)', '_code')
+
+df_inspection_result
+nrow(df_inspection_result)
+
+```
+
+```{r df_building}
+#Bin should be a key value, but some data is missing. Therefore, a dataset with bin and datasets without bin are separated and processed, and then each dataset is merged. In addition, datasets without bin are divided into each boro to create temporary bin(boro_code+'9'+'00001'~). Also, since the building table is related to the dba table, it is separated into two data frames after working at once. Need to trim a little more
+
+# Dataset with building identification number
+df_w_bin <- unique(data %>%
+                     select(c(bin, camis, dba, phone, 
+                              boro, building, street, zipcode, latitude, longitude,
+                              community_board, council_district, census_tract, bbl, nta)) %>%
+                     filter(!is.na(bin)) %>%
+                     mutate_at(c('latitude', 'longitude'), as.numeric))
+df_w_bin$bin <- as.character(df_w_bin$bin)
+
+# create temporary bin for Manhattan
+df_wo_bin_1 <- unique(data %>%
+                         filter(is.na(bin) & boro == 'Manhattan') %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_1$bin <- as.character(df_wo_bin_1$bin + 1900000)
+ 
+# create temporary bin for Bronx
+df_wo_bin_2 <- unique(data %>%
+                         filter(is.na(bin) & boro == 'Bronx') %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_2$bin <- as.character(df_wo_bin_2$bin + 2900000)
+
+# create temporary bin for Brooklyn
+df_wo_bin_3 <- unique(data %>%
+                         filter(is.na(bin) & boro == 'Brooklyn') %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_3$bin <- as.character(df_wo_bin_3$bin + 3900000)
+
+# create temporary bin for Queens
+df_wo_bin_4 <- unique(data %>%
+                         filter(is.na(bin) & boro == 'Queens') %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_4$bin <- as.character(df_wo_bin_4$bin + 4900000)
+
+# create temporary bin for Staten Island
+df_wo_bin_5 <- unique(data %>%
+                         filter(is.na(bin) & boro == 'Staten Island') %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_5$bin <- as.character(df_wo_bin_5$bin + 5900000)
+
+# create temporary bin for others
+df_wo_bin_9 <- unique(data %>%
+                         filter(is.na(bin)) %>%
+                         select(c(camis, dba, phone,
+                                  boro, building, street, zipcode, latitude, longitude,
+                                  community_board, council_district, census_tract, bbl, nta)) %>%
+                         mutate_at(c('latitude', 'longitude'), as.numeric)) %>%
+                         tibble::rowid_to_column(., 'bin')
+df_wo_bin_9$bin <- as.character(df_wo_bin_9$bin + 9000000)
+
+df_bin <- union(df_w_bin, df_wo_bin_1) %>%
+             union(., df_wo_bin_2) %>%
+             union(., df_wo_bin_3) %>%
+             union(., df_wo_bin_4) %>%
+             union(., df_wo_bin_5) %>%
+             union(., df_wo_bin_9)
+
+df_bin %>%
+ group_by(boro) %>%
+ summarise(count = n())
+ 
+df_building <- df_bin %>%
+               select(-c(camis, dba, phone))
+
+df_building
+nrow(df_building)
+
+
+df_dba <- df_bin %>%
+           select(-c(boro, building, street, zipcode, latitude, longitude,
+                     community_board, council_district, census_tract, bbl, nta))
+
+df_dba
+nrow(df_dba)
+```
+
+```{r load data into a database}
+
+```
