@@ -1,6 +1,6 @@
 create table if not exists tbl_inspection_result (
     camis              varchar(8)       not null,
-    inspection_date    date                 null,
+    inspection_date    date             not null,
     action_code        varchar(2)           null,
     score              int                  null,
     grade_code         varchar(1)           null,
