@@ -4,7 +4,7 @@ create table if not exists tbl_inspection_result (
     action_code        varchar(2)           null,
     score              int                  null,
     grade_code         varchar(1)           null,
-    grade_date         date             not null,
+    grade_date         date                 null,
     record_date        date             not null,
     cuisine_code       varchar(3)        not null,
     primary key(camis, inspection_date),
