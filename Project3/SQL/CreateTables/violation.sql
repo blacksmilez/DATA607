@@ -1,9 +1,6 @@
 create table if not exists tbl_violation (
     camis                         varchar(8) not null,
-    inspection_date               date       not null,
---    violation_code                int        not null,
---    violation_description_code    int        not null,
---    critical_flag_code            int        not null,
+    inspection_date               date           null,
     violation_code                varchar(3) not null,
     violation_description_code    varchar(3) not null,
     critical_flag_code            varchar(1) not null,
