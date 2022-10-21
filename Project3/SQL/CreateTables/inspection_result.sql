@@ -6,7 +6,7 @@ create table if not exists tbl_inspection_result (
     grade_code         varchar(1)           null,
     grade_date         date                 null,
     record_date        date             not null,
-    cuisine_code       varchar(3)        not null,
+    cuisine_code       varchar(3)           null,
     primary key(camis, inspection_date),
     foreign key(camis) references tbl_dba(camis),
     foreign key(action_code) references tbl_action_code(action_code),
