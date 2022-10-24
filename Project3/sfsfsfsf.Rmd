@@ -351,6 +351,7 @@ The below tables will unite info about every inspection and violation.
 ```{r}
 inspection <- cbind(tbl_inspection_type,tbl_inspection_result, tbl_violation)
 inspection <- inspection [, !duplicated(colnames(inspection))]
+head(inspection)
 ```
 Finally, we will combine two above table. As a result, we have info about every restaraunt (name, address, type of cusine, inspection date, violation type, etc). There are 26 columns of information.
 ```{r}
@@ -394,7 +395,7 @@ ggplot(data=final, aes(x=reorder(boro_code, desc(boro_code)))) +
     labs(title='Grades in each Borough', x='Borough', y='# of Inspections') + 
     theme_bw()    
 ```
-Besides ggplot, there is a great library to use to plot graphs "plot_ly". This library helped us to answer our next question "Based on the previous plot, does Manhattan have really much more restaurants comparing to other borough?" as difference looks enormous. \
+\ Besides ggplot, there is a great library to use to plot graphs "plot_ly". This library helped us to answer our next question "Based on the previous plot, does Manhattan have really much more restaurants comparing to other borough?" as difference looks enormous. \
 It seems that Manhattan has around 3,000 more restaurants than Brooklyn but almost double amount of inspections. 
 ```{r warning=FALSE, message=FALSE}
 
@@ -409,7 +410,7 @@ final %>%
          yaxis = list(title="#of restaurants"),
          bargap = 0.3)
 ```
-It was interesting to know which cuisine is the most common for the city. \
+\ It was interesting to know which cuisine is the most common for the city. \
 "003" code stands for "American" cuisine, "019" for Chinese, "022" for Coffee/Tea, "066" for Pizza, "047 for Italian", "055" for Mexican and "048" for 	
 Japanese. We took the codes from the table "tbl_cuisine_code".
 ```{r warning=FALSE, message=FALSE}
@@ -443,7 +444,7 @@ tbl_cuisine_code %>% filter(grepl('066', cuisine_code))
 tbl_cuisine_code %>% filter(grepl('047', cuisine_code))
 tbl_cuisine_code %>% filter(grepl('055', cuisine_code))
 ```
-Also, we were curious about teh most common violations around the city.\ 
+\ Also, we were curious about teh most common violations around the city.\ 
 The most common is "Non-food contact surface improperly constructed. Unacceptable material used. Non-food contact surface or equipment improperly maintained and/or not properly sealed, raised, spaced or movable to allow accessibility for cleaning on all sides, etc". \
 Second is "Facility not vermin proof. Harborage or conditions conducive to attracting vermin to the premises and/or allowing vermin to exist.". \
 Third is "Food contact surface not properly washed, rinsed and sanitized after each use and following any activity when contamination may have occurred.".
