@@ -312,7 +312,7 @@ Using dbWriteTable() function, we will send our R data frames to SQL tables.
 
 ### 6. Data preporation for analysis
 #### 6.1 Load data from the database.
-Before starting the analysis, we need to load the data from the database and make it more convinient for analysis. \
+Before starting the analysis, we need to load the data from the database and make it more convenient for analysis. \
 The list of tables in our remote database.
 ```{r}
 dbListTables(db)
