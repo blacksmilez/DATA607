@@ -10,6 +10,7 @@ linestretch: 1.5
 ---
 
 ```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(error = TRUE)
 library(dplyr)
 library(stringr)
 library(jsonlite)
@@ -58,7 +59,7 @@ The description of the columns is provided at the link below:
 **Entity-Relationship diagram** \
 A physical data model for the normalized database, and an Entity-Relationship (ER) diagram is available via team's GitHub repository. On our ER diagram we have a few approaches to doing some analytical deliverable where we can inspect our dataset. One option is going through inspection type with and without the influence of inspection_code. This can give us some correlation where inspection code may have different types of inspection results. Another investigation road we can focus on would be the building and how it can influences some of the inspection results. These types of focuses can give us some insights on how New York Restaurant inspections are being graded and the types of influences that will affect the grading of the inspections for these NYC restaurants.\
 <p align="center">
- ![](erd.png)
+  <img src="https://raw.githubusercontent.com/blacksmilez/DATA607/main/Project3/erd.png">
 </p>
 
 ### 5. Load data, Azure database
@@ -146,7 +147,7 @@ df_inspection_code <- unique(data %>%
                       mutate_at(c('inspection_code'), function(x) str_sub(paste0('00', x), -2, -1))
 head(df_inspection_code, n=3)
 ```
-after, create a data frame to store the camis, inspection_date and inspection_code. Among the read data, data whose value in the inspection_type column is not null is selected. Get inspection_code from data frame df_inspection_code using left_join. After that, inspection_type is excluded from the data frame.
+After, create a data frame to store the camis, inspection_date and inspection_code. Among the read data, data whose value in the inspection_type column is not null is selected. Get inspection_code from data frame df_inspection_code using left_join. After that, inspection_type is excluded from the data frame.
 ```{r df_inspection_type}
 df_inspection_type <- data %>%
                         select(c(camis, inspection_date, inspection_type)) %>%
@@ -268,44 +269,44 @@ head(df_dba, n=3)
 ```
 
 #### 5.3 Load tables to database
-The group has used Azure database to store the tables, so all th egroup members could access it any time. As an alternative, you can store the tables on the local machine.
-
+The group has used Azure database to store the tables, so all the group members could access it any time. As an alternative, you can store the tables on the local machine.
+(We had to comment the code for Azure j=for knitting purpose, otherwise it takes forever to knit the document)
 ```{r database-connection}
-dbname <- 'data607'  # SECRET!!
-host <- 'sps-data-proj.mysql.database.azure.com'  # SECRET!!
-port <- 3306  # SECRET!!
-user <- 'data607user'  # SECRET!!
-password <- 'msds1234!'  # SECRET!!
-conn <- dbConnect(RMySQL::MySQL(),
-                  dbname=dbname,
-                  host=host,
-                  port=port,
-                  user=user,
-                  password=password)
+#dbname <- 'data607'  # SECRET!!
+#host <- 'sps-data-proj.mysql.database.azure.com'  # SECRET!!
+#port <- 3306  # SECRET!!
+#user <- 'data607user'  # SECRET!!
+#password <- 'msds1234!'  # SECRET!!
+#conn <- dbConnect(RMySQL::MySQL(),
+                  #dbname=dbname,
+                  #host=host,
+                  #port=port,
+                  #user=user,
+                  #password=password)
 
 #For local machine
 db = dbConnect(MySQL(), user='root', password = '336261', dbname='delays', host='localhost')
 ```
-We have created necessary sql tables to store the info from R dataframes.
-```{r, create-tables, eval=FALSE}
-tables <- c('boro', 'critical_flag_code', 'violation_description_code', 'violation_code',
-            'grade_code', 'action_code', 'inspection_code', 'cuisine_code', 'building',
-            'dba', 'inspection_result', 'violation', 'inspection_type')
-lapply(tables, function(x) dbExecute(conn, read_file(paste0('https://raw.githubusercontent.com/blacksmilez/',
-                                                           'DATA607/main/Project3/SQL/CreateTables/',
-                                                           x,
-                                                           '.sql'))))
+We have created necessary sql tables to store the info from R data frames.
+```{r}
+#tables <- c('boro', 'critical_flag_code', 'violation_description_code', 'violation_code',
+#            'grade_code', 'action_code', 'inspection_code', 'cuisine_code', 'building',
+#            'dba', 'inspection_result', 'violation', 'inspection_type')
+#lapply(tables, function(x) dbExecute(conn, read_file(paste0('https://raw.githubusercontent.com/blacksmilez/',
+#                                                           'DATA607/main/Project3/SQL/CreateTables/',
+#                                                           x,
+#                                                           '.sql'))))
 ```
 Using dbWriteTable() function, we will send our R data frames to SQL tables.
-```{r, load data into a database, eval=FALSE}
-table_names <- c('tbl_boro', 'tbl_critical_flag_code', 'tbl_violation_description_code', 'tbl_violation_code',
-                 'tbl_grade_code', 'tbl_action_code', 'tbl_inspection_code', 'tbl_cuisine_code', 'tbl_building',
-                 'tbl_dba', 'tbl_inspection_result', 'tbl_inspection_type', 'tbl_violation')
-df <- list(df_boro, df_critical_flag_code, df_violation_description_code, df_violation_code,
-           df_grade_code, df_action_code, df_inspection_code, df_cuisine_code, df_building,
-           df_dba, df_inspection_result, df_inspection_type, df_violation)
+```{r}
+#table_names <- c('tbl_boro', 'tbl_critical_flag_code', 'tbl_violation_description_code', 'tbl_violation_code',
+#                 'tbl_grade_code', 'tbl_action_code', 'tbl_inspection_code', 'tbl_cuisine_code', 'tbl_building',
+#                 'tbl_dba', 'tbl_inspection_result', 'tbl_inspection_type', 'tbl_violation')
+#df <- list(df_boro, df_critical_flag_code, df_violation_description_code, df_violation_code,
+#           df_grade_code, df_action_code, df_inspection_code, df_cuisine_code, df_building,
+#           df_dba, df_inspection_result, df_inspection_type, df_violation)
 
-lapply(seq_along(table_names), function(i) dbWriteTable(conn, table_names[[i]], df[[i]], row.names=FALSE, append=TRUE))
+#lapply(seq_along(table_names), function(i) dbWriteTable(conn, table_names[[i]], df[[i]], row.names=FALSE, append=TRUE))
 ```
 
 
@@ -335,8 +336,8 @@ tbl_inspection_result <- dbReadTable(db, 'tbl_inspection_result', row.names = NU
 tbl_violation <- dbReadTable(db, 'tbl_violation', row.names = NULL)
 ```
 
-```{r close-connection}
-dbDisconnect(conn)
+```{r}
+#dbDisconnect(conn)
 dbDisconnect(db)
 ```
 #### 6.2 Combining tables
@@ -359,10 +360,10 @@ head(final)
 
 #### 6.2 Replacing codes
 As the next step, we will substitute codes in some columns with words as it will be useful for explanatory analysis. \
-Instead of the borough code (1,2,3, etc) and action code (01, 02, etc)we will use the borough names (Manhattan, Bronx, etc) nd action descriptions, the description of each borough code is stored in the tables tbl_boro, action is in the action_code table. \
+Instead of the borough code (1,2,3, etc) and action code (01, 02, etc)we will use the borough names (Manhattan, Bronx, etc) and action descriptions, the description of each borough code is stored in the tables tbl_boro, action is in the action_code table. \
 ```{r}
 tbl_boro
-action_code
+tbl_action_code
 ```
 
 ```{r}
