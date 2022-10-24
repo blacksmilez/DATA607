@@ -350,7 +350,7 @@ head(restaurants,n=3)
 The below tables will unite info about every inspection and violation.
 ```{r}
 inspection <- cbind(tbl_inspection_type,tbl_inspection_result, tbl_violation)
-inspection <- inspection [, !duplicated(colnames(total))]
+inspection <- inspection [, !duplicated(colnames(inspection))]
 ```
 Finally, we will combine two above table. As a result, we have info about every restaraunt (name, address, type of cusine, inspection date, violation type, etc). There are 26 columns of information.
 ```{r}
