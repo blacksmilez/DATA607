@@ -288,7 +288,7 @@ conn <- dbConnect(RMySQL::MySQL(),
 db = dbConnect(MySQL(), user='root', password = '336261', dbname='delays', host='localhost')
 ```
 We have created necessary sql tables to store the info from R dataframes.
-```{r create-tables,eval=False}
+```{r create-tables eval=False}
 tables <- c('boro', 'critical_flag_code', 'violation_description_code', 'violation_code',
             'grade_code', 'action_code', 'inspection_code', 'cuisine_code', 'building',
             'dba', 'inspection_result', 'violation', 'inspection_type')
@@ -298,7 +298,7 @@ lapply(tables, function(x) dbExecute(conn, read_file(paste0('https://raw.githubu
                                                            '.sql'))))
 ```
 Using dbWriteTable() function, we will send our R data frames to SQL tables.
-```{r load data into a database, eval=False}
+```{r load data into a database eval=False}
 dbListTables(conn)
 table_names <- c('tbl_boro', 'tbl_critical_flag_code', 'tbl_violation_description_code', 'tbl_violation_code',
                  'tbl_grade_code', 'tbl_action_code', 'tbl_inspection_code', 'tbl_cuisine_code', 'tbl_building',
