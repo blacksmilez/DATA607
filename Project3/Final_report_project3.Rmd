@@ -276,7 +276,7 @@ The group has used Azure database to store the tables, so all the group members 
 #host <- 'sps-data-proj.mysql.database.azure.com'  # SECRET!!
 #port <- 3306  # SECRET!!
 #user <- 'data607user'  # SECRET!!
-#password <- 'msds1234!'  # SECRET!!
+#password <- ''  # SECRET!!
 #conn <- dbConnect(RMySQL::MySQL(),
                   #dbname=dbname,
                   #host=host,
