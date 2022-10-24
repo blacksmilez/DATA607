@@ -288,7 +288,7 @@ conn <- dbConnect(RMySQL::MySQL(),
 db = dbConnect(MySQL(), user='root', password = '336261', dbname='delays', host='localhost')
 ```
 We have created necessary sql tables to store the info from R dataframes.
-```{r create-tables}
+```{r create-tables,eval=False}
 tables <- c('boro', 'critical_flag_code', 'violation_description_code', 'violation_code',
             'grade_code', 'action_code', 'inspection_code', 'cuisine_code', 'building',
             'dba', 'inspection_result', 'violation', 'inspection_type')
