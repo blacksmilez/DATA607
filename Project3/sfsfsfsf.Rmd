@@ -10,7 +10,6 @@ linestretch: 1.5
 ---
 
 ```{r setup, include=FALSE, results='hide', warning=FALSE, message=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 library(stringr)
 library(jsonlite)
@@ -288,7 +287,7 @@ conn <- dbConnect(RMySQL::MySQL(),
 db = dbConnect(MySQL(), user='root', password = '336261', dbname='delays', host='localhost')
 ```
 We have created necessary sql tables to store the info from R dataframes.
-```{r create-tables eval=False}
+```{r, create-tables, eval=FALSE}
 tables <- c('boro', 'critical_flag_code', 'violation_description_code', 'violation_code',
             'grade_code', 'action_code', 'inspection_code', 'cuisine_code', 'building',
             'dba', 'inspection_result', 'violation', 'inspection_type')
@@ -298,8 +297,7 @@ lapply(tables, function(x) dbExecute(conn, read_file(paste0('https://raw.githubu
                                                            '.sql'))))
 ```
 Using dbWriteTable() function, we will send our R data frames to SQL tables.
-```{r load data into a database eval=False}
-dbListTables(conn)
+```{r, load data into a database, eval=FALSE}
 table_names <- c('tbl_boro', 'tbl_critical_flag_code', 'tbl_violation_description_code', 'tbl_violation_code',
                  'tbl_grade_code', 'tbl_action_code', 'tbl_inspection_code', 'tbl_cuisine_code', 'tbl_building',
                  'tbl_dba', 'tbl_inspection_result', 'tbl_inspection_type', 'tbl_violation')
@@ -316,7 +314,7 @@ lapply(seq_along(table_names), function(i) dbWriteTable(conn, table_names[[i]], 
 Before starting the analysis, we need to load the data from the database and make it more convinient for analysis. \
 The list of tables in our remote database.
 ```{r}
-dbListTables(conn)
+dbListTables(db)
 ```
 Each table we will load to R data frame and disconnect from the database.
 ```{r warning=FALSE, message=FALSE}
@@ -348,7 +346,7 @@ First, we should unite tables that contain dba and building info (address, borou
 restaurants <- full_join(x = tbl_dba, y = tbl_building, by = "bin")
 head(restaurants,n=3)
 ```
-The below tables will unite infor about every inspection and violation.
+The below tables will unite info about every inspection and violation.
 ```{r}
 inspection <- cbind(tbl_inspection_type,tbl_inspection_result, tbl_violation)
 inspection <- total[, !duplicated(colnames(total))]
